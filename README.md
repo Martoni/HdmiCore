@@ -19,7 +19,7 @@ On your personnal `build.sbt` project add the following line :
 ```Scala
     libraryDependencies ++= Seq(
 //    ...
-      "com.armadeus" %% "HdmiCore" % "0.1.0"
+      "com.armadeus" %% "hdmicore" % "0.1.0"
     ),
 
 ```

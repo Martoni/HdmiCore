@@ -22,14 +22,14 @@ class Rgb2Tmds extends Module {
   /* red */
   val trM = Module(new TMDSEncoder())
   trM.io.en := io.videoSig.de
-  trM.io.ctrl := io.videoSig.vsync ## io.videoSig.hsync
+  trM.io.ctrl := 0.U
   trM.io.din := io.videoSig.pixel.red
   io.tmds_red := trM.io.dout
 
   /* green */
   val tgM = Module(new TMDSEncoder())
   tgM.io.en := io.videoSig.de
-  tgM.io.ctrl := io.videoSig.vsync ## io.videoSig.hsync
+  tgM.io.ctrl := 0.U 
   tgM.io.din := io.videoSig.pixel.green
   io.tmds_green := tgM.io.dout
 }

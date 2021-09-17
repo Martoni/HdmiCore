@@ -22,13 +22,16 @@ class PatternExample extends Module {
   val hv_sync = Module(new HVSync(vp)) // Synchronize VGA module
   val video_de = hv_sync.io.display_on
   /* hdmi transmission */
+
   val rgb2tmds = Module(new Rgb2Tmds())
   rgb2tmds.io.videoSig.de := video_de 
   rgb2tmds.io.videoSig.hsync := hv_sync.io.hsync
   rgb2tmds.io.videoSig.vsync := hv_sync.io.vsync
-  rgb2tmds.io.videoSig.pixel.red   := Mux(video_de, "hFF".U(8.W), 0.U)
-  rgb2tmds.io.videoSig.pixel.green := Mux(video_de, "h55".U(8.W), 0.U)
-  rgb2tmds.io.videoSig.pixel.blue  := Mux(video_de, "h00".U(8.W), 0.U)
+  rgb2tmds.io.videoSig.pixel.red   := Mux(video_de, "h00".U(8.W), 0.U)
+  rgb2tmds.io.videoSig.pixel.green := Mux(video_de, "h00".U(8.W), 0.U)
+  rgb2tmds.io.videoSig.pixel.blue  := Mux(video_de, "hFF".U(8.W), 0.U)
+
+  
 
   /* serdes */
   // Blue -> data 0

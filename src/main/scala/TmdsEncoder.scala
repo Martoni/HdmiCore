@@ -28,7 +28,7 @@ class TMDSEncoder extends Module {
   def xnorfct(value: UInt): UInt = {
     value.getWidth match {
       case 1 => value(0)
-      case s => val res = xorfct(VecInit(value.asBools.drop(1)).asUInt)
+      case s => val res = xnorfct(VecInit(value.asBools.drop(1)).asUInt)
           !(value.asBools.head ^ res.asBools.head) ## res
     }
   }

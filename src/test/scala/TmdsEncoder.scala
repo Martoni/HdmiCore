@@ -1,4 +1,4 @@
-package HdmiCore
+package hdmicore
 
 import org.scalatest._
 import chiseltest._

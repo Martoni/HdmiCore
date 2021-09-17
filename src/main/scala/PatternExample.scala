@@ -6,7 +6,15 @@ import chisel3.util._
 import video.{VideoParams, HVSync}
 import fpgamacro.gowin.{Oser10Module, TLVDS_OBUF}
 
-class PatternExample extends Module {
+
+sealed trait PatternType
+case object ptRainbow extends PatternType
+case object ptVStripes extends PatternType
+case object ptHStripes extends PatternType
+case object ptFrenchFlag extends PatternType
+
+
+class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
   val io = IO(new Bundle {
     val serClk = Input(Clock())
     val tmds = Output(new Tmds())
@@ -22,52 +30,70 @@ class PatternExample extends Module {
   val hv_sync = Module(new HVSync(vp)) // Synchronize VGA module
   val video_de = hv_sync.io.display_on
 
-  /* generate rainbow */
-  /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
-  val cTrig1 = 255.U
-  val cTrig2 = 510.U
-  val cTrig3 = 765.U
-  val cTrig4 = 1020.U
-  val cTrig5 = 1275.U
-  val cTrig6 = 1530.U
-  val hpos = hv_sync.io.hpos
-  val pred = Wire(UInt(8.W))
-  when(hpos < cTrig1){
-    pred := cTrig1
-  }.elsewhen(hpos < cTrig2) {
-    pred := cTrig2 - hpos
-  }.elsewhen(hpos < cTrig4){
-    pred := 0.U
-  }.elsewhen(hpos < cTrig5){
-    pred := hpos - cTrig4
-  }.otherwise{
-    pred := cTrig1
-  }
-  val pgreen = Wire(UInt(8.W))
-  when(hpos < cTrig1){
-    pgreen := hpos 
-  }.elsewhen(hpos < cTrig3){
-    pgreen := cTrig1
-  }.elsewhen(hpos < cTrig4){
-    pgreen := cTrig4 - hpos
-  }.otherwise{
-    pgreen := 0.U
-  }
-
   val pblue  = Wire(UInt(8.W))
-  when(hpos < cTrig2){
-    pblue := 0.U
-  }.elsewhen(hpos < cTrig3){
-    pblue := hpos - cTrig2
-  }.elsewhen(hpos < cTrig5){
-    pblue := cTrig1
-  }.elsewhen(hpos < cTrig6){
-    pblue := cTrig6 - hpos
-  }.otherwise {
-    pblue := 0.U
-  }
+  val pred = Wire(UInt(8.W))
+  val pgreen = Wire(UInt(8.W))
+  val hpos = hv_sync.io.hpos
+  val vpos = hv_sync.io.vpos
+  if(pt == ptRainbow){
+    /* generate rainbow */
+    /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
+    val cTrig1 = 255.U
+    val cTrig2 = 510.U
+    val cTrig3 = 765.U
+    val cTrig4 = 1020.U
+    val cTrig5 = 1275.U
+    val cTrig6 = 1530.U
+    val x = RegNext((hpos*cTrig6)/vp.H_DISPLAY.U)
+    when(x < cTrig1){
+      pred := cTrig1
+    }.elsewhen(x < cTrig2) {
+      pred := cTrig2 - x
+    }.elsewhen(x < cTrig4){
+      pred := 0.U
+    }.elsewhen(x < cTrig5){
+      pred := x - cTrig4
+    }.otherwise{
+      pred := cTrig1
+    }
+    when(x < cTrig1){
+      pgreen := x 
+    }.elsewhen(x < cTrig3){
+      pgreen := cTrig1
+    }.elsewhen(x < cTrig4){
+      pgreen := cTrig4 - x
+    }.otherwise{
+      pgreen := 0.U
+    }
   
-
+    when(x < cTrig2){
+      pblue := 0.U
+    }.elsewhen(x < cTrig3){
+      pblue := x - cTrig2
+    }.elsewhen(x < cTrig5){
+      pblue := cTrig1
+    }.elsewhen(x < cTrig6){
+      pblue := cTrig6 - x
+    }.otherwise {
+      pblue := 0.U
+    }
+  }
+  if(pt == ptVStripes){
+    pred   := Mux(0.U === hpos % 2.U, 0.U, 255.U)
+    pgreen := Mux(0.U === hpos % 2.U, 0.U, 255.U)
+    pblue  := Mux(0.U === hpos % 2.U, 0.U, 255.U)
+  }
+  if(pt == ptHStripes){
+    pred   := Mux(0.U === vpos % 2.U, 0.U, 255.U)
+    pgreen := Mux(0.U === vpos % 2.U, 0.U, 255.U)
+    pblue  := Mux(0.U === vpos % 2.U, 0.U, 255.U)
+  }
+  if(pt == ptFrenchFlag){
+    val swidth = 1280
+    pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
+    pgreen := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+    pblue := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
+  }
 
   /* hdmi transmission */
   val rgb2tmds = Module(new Rgb2Tmds())
@@ -77,8 +103,6 @@ class PatternExample extends Module {
   rgb2tmds.io.videoSig.pixel.red   := Mux(video_de, pred, 0.U)
   rgb2tmds.io.videoSig.pixel.green := Mux(video_de, pgreen, 0.U)
   rgb2tmds.io.videoSig.pixel.blue  := Mux(video_de, pblue, 0.U)
-
-  
 
   /* serdes */
   // Blue -> data 0

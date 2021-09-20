@@ -4,6 +4,11 @@ HDMI Chisel core
 This HDMI core is mainly inspired from
 [vhdl-hdmi-out](https://github.com/fcayci/vhdl-hdmi-out) project.
 
+![French_flags_720p](assets/ff720p.jpg)
+
+
+
+
 # Install
 
 To use it locally, first clone the repository then publish it locally :

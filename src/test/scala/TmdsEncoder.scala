@@ -2,10 +2,13 @@ package hdmicore
 
 import org.scalatest._
 import chiseltest._
+import chiseltest.formal._
 import chisel3._
+import chisel3.util.PopCount
+import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.util.control.Breaks._
-import java.io._ // for files read/write access
+import java.io._
 import scala.util.Random
 
 
@@ -42,3 +45,20 @@ class TMDSEncoderSpec extends FlatSpec with ChiselScalatestTester with Matchers 
 
 
 }
+
+class TMDSFormalSpec extends Module {
+  val dut = Module(new TMDSEncoder)
+  val io = IO(chiselTypeOf(dut.io))
+  io <> dut.io
+
+  // the number of ones and zeros should always be balanced
+  val ones = dontTouch(WireInit(PopCount(dut.io.dout)))
+  assert(ones === 5.U || ones === 6.U)
+}
+
+class TMDSEncoderFormalTest extends AnyFlatSpec with ChiselScalatestTester with Formal {
+  "TMDSEncoder" should "pass a bounded check" in {
+    verify(new TMDSFormalSpec, Seq(BoundedCheck(4), CVC4EngineAnnotation))
+  }
+}
+

@@ -4,8 +4,6 @@ import org.scalatest._
 import chiseltest._
 import chisel3._
 
-import chiseltest.experimental.TestOptionBuilder._
-import chiseltest.internal.VerilatorBackendAnnotation
 import scala.util.control.Breaks._
 import java.io._ // for files read/write access
 import scala.util.Random

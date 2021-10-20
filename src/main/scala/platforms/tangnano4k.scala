@@ -26,7 +26,13 @@ class TangNano4k extends RawModule {
     val O_tmds_clk_n  = IO(Output(Bool()))
     val O_tmds_data_p = IO(Output(UInt(3.W)))
     val O_tmds_data_n = IO(Output(UInt(3.W)))
+
+    /* button */
+    val I_button = IO(Input(Bool()))
+    val O_trig = IO(Output(Bool()))
     /********************************************/
+
+    O_trig := I_button
 
     O_led := 1.U(2.W)
 

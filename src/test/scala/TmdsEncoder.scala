@@ -5,6 +5,7 @@ import chiseltest._
 import chiseltest.formal._
 import chisel3._
 import chisel3.util.PopCount
+import chisel3.util._
 import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.util.control.Breaks._
@@ -46,14 +47,31 @@ class TMDSEncoderSpec extends FlatSpec with ChiselScalatestTester with Matchers 
 
 }
 
+/** cvc4 is required for this test
+ * https://cvc4.github.io/
+ */
+
 class TMDSFormalSpec extends Module {
   val dut = Module(new TMDSEncoder)
   val io = IO(chiselTypeOf(dut.io))
   io <> dut.io
 
+  /* default control frame when disable (io.en === false.B) */
+  val resetValid = RegInit(false.B)
+  resetValid := true.B
+  when(past(dut.io.en === false.B) && resetValid){
+    switch(past(dut.io.ctrl)){
+        is("b00".U(2.W)){assert(dut.io.dout === "b1101010100".U(10.W))}
+        is("b01".U(2.W)){assert(dut.io.dout === "b0010101011".U(10.W))}
+        is("b10".U(2.W)){assert(dut.io.dout === "b0101010100".U(10.W))}
+        is("b11".U(2.W)){assert(dut.io.dout === "b1010101011".U(10.W))}
+    }
+  }
+
   // the number of ones and zeros should always be balanced
-  val ones = dontTouch(WireInit(PopCount(dut.io.dout)))
-  assert(ones === 5.U || ones === 6.U)
+//  val ones = dontTouch(WireInit(PopCount(dut.io.dout)))
+//  assert(ones === 5.U || ones === 6.U)
+
 }
 
 class TMDSEncoderFormalTest extends AnyFlatSpec with ChiselScalatestTester with Formal {

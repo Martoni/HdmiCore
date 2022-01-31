@@ -8,8 +8,8 @@ lazy val root = (project in file("."))
   .settings(
     name := "hdmicore",
     libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "chisel3" % "3.5.0-RC1",
-      "edu.berkeley.cs" %% "chiseltest" % "0.5.0-RC1" % "test",
+      "edu.berkeley.cs" %% "chisel3" % "3.5.0",
+      "edu.berkeley.cs" %% "chiseltest" % "0.5.0" % "test",
       "org.armadeus" %% "fpgamacro" % "0.1.0"
     ),
     scalacOptions ++= Seq(

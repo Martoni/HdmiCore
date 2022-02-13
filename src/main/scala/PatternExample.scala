@@ -12,6 +12,19 @@ case object ptRainbow extends PatternType
 case object ptVStripes extends PatternType
 case object ptHStripes extends PatternType
 case object ptFrenchFlag extends PatternType
+case object ptIrishFlag extends PatternType
+case object ptItalianFlag extends PatternType
+case object ptBelgianFlag extends PatternType
+case object ptDutchFlag extends PatternType
+case object ptLuxembourgishFlag extends PatternType
+case object ptGermanFlag extends PatternType
+case object ptSpanishFlag extends PatternType
+case object ptAustrianFlag extends PatternType
+case object ptGreekFlag extends PatternType
+case object ptDanishFlag extends PatternType
+case object ptSwedishFlag extends PatternType
+case object ptFinnishFlag extends PatternType
+case object ptNorwegianFlag extends PatternType
 
 
 class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
@@ -93,6 +106,116 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
+  }
+  if(pt == ptIrishFlag){
+    val swidth = 1280
+    pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
+    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 2.U)
+    pblue := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+  }
+  if(pt == ptItalianFlag){
+    val swidth = 1280
+    pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
+    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
+    pblue := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+  }
+  if(pt == ptBelgianFlag){
+    val swidth = 1280
+    pred := Mux(hpos > (swidth/3).U, 255.U, 0.U)
+    pgreen := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+    pblue := 0.U
+  }
+  if(pt == ptDutchFlag){
+    val sheight = 720
+    val prbright = Mux(vpos < (sheight/3).U, 2.U, 255.U)
+    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 2.U)
+    pred := Mux(vpos < (sheight*2/3).U, prbright, 0.U)
+    pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
+    pblue := Mux(vpos < (sheight/3).U, 0.U, pbbright)
+  }
+  if(pt == ptLuxembourgishFlag){
+    val sheight = 720
+    pred := Mux(vpos < (sheight*2/3).U, 255.U, 0.U)
+    pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
+    pblue := Mux(vpos < (sheight/3).U, 0.U, 255.U)
+  }
+  if(pt == ptGermanFlag){
+    val sheight = 720
+    pred := Mux(vpos > (sheight/3).U, 255.U, 0.U)
+    pgreen := Mux(vpos < (sheight*2/3).U, 0.U, 255.U)
+    pblue := 0.U
+  }
+  if(pt == ptSpanishFlag){
+    val sheight = 720
+    pred := 255.U
+    pgreen := Mux((vpos > (sheight/4).U) && (vpos < (sheight*3/4).U), 255.U, 0.U)
+    pblue := 0.U
+  }
+  if(pt == ptAustrianFlag){
+    val sheight = 720
+    pred := 255.U
+    pgreen :=  Mux((vpos > (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
+    pblue := Mux((vpos > (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
+  }
+  if(pt == ptGreekFlag){
+    val swidth = 1280
+    val sheight = 720
+    val swstep = swidth*3/80
+    val shstep = sheight/9
+    val oinv = Mux((hpos <= (swstep*10).U) && (vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, 0.U)
+    val pinv = Mux((hpos > (swstep*4).U) && (hpos <= (swstep*6).U) && (vpos <= (shstep*5).U), 255.U, oinv)
+    val ninv = Mux(((hpos <= (swstep*4).U) || (hpos > (swstep*6).U)) && (hpos <= (swstep*10).U) && (vpos <= (shstep*5).U), 0.U, 255.U)
+    pred := Mux(vpos % (sheight*2/9).U > (sheight/9).U, ninv, pinv)
+    pgreen := Mux(vpos % (sheight*2/9).U > (sheight/9).U, ninv, pinv)
+    pblue := 255.U
+  }
+  if(pt == ptDanishFlag){
+    val swidth = 1280
+    val sheight = 720
+    val swstep = swidth*4/37
+    val shstep = sheight/7
+    val pinv = Mux((hpos > (swstep*3).U) && (hpos <= (swstep*4).U), 255.U, 0.U)
+    pred := 255.U
+    pgreen := Mux((vpos > (shstep*3).U) && (vpos <= (shstep*4).U), 255.U, pinv)
+    pblue := Mux((vpos > (shstep*3).U) && (vpos <= (shstep*4).U), 255.U, pinv)
+  }
+  if(pt == ptSwedishFlag){
+    val swidth = 1280
+    val sheight = 720
+    val swstep = swidth/16
+    val shstep = sheight/5
+    val pinv = Mux((hpos > (swstep*5).U) && (hpos <= (swstep*7).U), 255.U, 0.U)
+    val ninv = Mux((hpos > (swstep*5).U) && (hpos <= (swstep*7).U), 0.U, 255.U)
+    pred := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, pinv)
+    pgreen := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, pinv)
+    pblue := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 0.U, ninv)
+  }
+  if(pt == ptFinnishFlag){
+    val swidth = 1280
+    val sheight = 720
+    val swstep = swidth/18
+    val shstep = sheight/11
+    val ninv = Mux((hpos > (swstep*5).U) && (hpos <= (swstep*8).U), 0.U, 255.U)
+    pred := Mux((vpos > (shstep*4).U) && (vpos <= (shstep*7).U), 0.U, ninv)
+    pgreen := Mux((vpos > (shstep*4).U) && (vpos <= (shstep*7).U), 0.U, ninv)
+    pblue := 255.U
+  }
+  if(pt == ptNorwegianFlag){
+    val swidth = 1280
+    val sheight = 720
+    val swstep = swidth/22
+    val shstep = sheight/16
+    val minv = Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, 255.U)
+    val linv = Mux(((hpos > (swstep*6).U) && (hpos <= (swstep*7).U)) || ((hpos > (swstep*9).U) && (hpos <= (swstep*10).U)), minv, 0.U)
+    val kinv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, 255.U)
+    val pgbright = Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
+    val prbright = Mux(pgbright > 0.U, 255.U, 2.U)
+    val pbbright = Mux(pgbright > 0.U, 255.U, 2.U)
+    val pinv = Mux((hpos > (swstep*6).U) && (hpos <= (swstep*10).U), pbbright, 0.U)
+    val ninv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, prbright)
+    pred := Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, ninv)
+    pgreen := Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
+    pblue := Mux((vpos > (shstep*6).U) && (vpos <= (shstep*10).U), pbbright, pinv)
   }
 
   /* hdmi transmission */

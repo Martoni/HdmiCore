@@ -36,10 +36,10 @@ class TangNano4k extends RawModule {
 
     /* button */
     val I_button = IO(Input(Bool()))
-    val O_trig = IO(Output(Bool()))
+
     /********************************************/
 
-    O_trig := I_button
+
 
     O_led := 1.U(2.W)
 

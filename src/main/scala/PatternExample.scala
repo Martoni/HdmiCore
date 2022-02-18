@@ -104,25 +104,25 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
   if(pt == ptFrenchFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
-    pgreen := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+    pgreen := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
   }
   if(pt == ptIrishFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 2.U)
-    pblue := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+    pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   }
   if(pt == ptItalianFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
-    pblue := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+    pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   }
   if(pt == ptBelgianFlag){
     val swidth = 1280
-    pred := Mux(hpos > (swidth/3).U, 255.U, 0.U)
-    pgreen := Mux((hpos > (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
+    pred := Mux(hpos >= (swidth/3).U, 255.U, 0.U)
+    pgreen := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := 0.U
   }
   if(pt == ptDutchFlag){
@@ -141,21 +141,21 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
   }
   if(pt == ptGermanFlag){
     val sheight = 720
-    pred := Mux(vpos > (sheight/3).U, 255.U, 0.U)
+    pred := Mux(vpos >= (sheight/3).U, 255.U, 0.U)
     pgreen := Mux(vpos < (sheight*2/3).U, 0.U, 255.U)
     pblue := 0.U
   }
   if(pt == ptSpanishFlag){
     val sheight = 720
     pred := 255.U
-    pgreen := Mux((vpos > (sheight/4).U) && (vpos < (sheight*3/4).U), 255.U, 0.U)
+    pgreen := Mux((vpos >= (sheight/4).U) && (vpos < (sheight*3/4).U), 255.U, 0.U)
     pblue := 0.U
   }
   if(pt == ptAustrianFlag){
     val sheight = 720
     pred := 255.U
-    pgreen :=  Mux((vpos > (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
-    pblue := Mux((vpos > (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
+    pgreen :=  Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
+    pblue := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
   }
   if(pt == ptGreekFlag){
     val swidth = 1280

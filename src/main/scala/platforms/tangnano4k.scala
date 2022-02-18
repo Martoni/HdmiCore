@@ -71,6 +71,7 @@ class TangNano4k extends RawModule {
 
       val patternExample = Module(new PatternExample())
       patternExample.io.serClk := serial_clk
+      patternExample.io.I_button := I_button
 
       /* LVDS output */
       val buffDiffBlue = Module(new TLVDS_OBUF())

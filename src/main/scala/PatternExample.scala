@@ -31,7 +31,50 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
   val io = IO(new Bundle {
     val serClk = Input(Clock())
     val tmds = Output(new Tmds())
+    val I_button = Input(Bool())
   })
+
+  /* todo: replace fixed values with scala convert/cast */
+  val ptIdxRainbow = 0.U
+  val ptIdxVStripes = 1.U
+  val ptIdxHStripes = 2.U
+  val ptIdxFrenchFlag = 3.U
+  val ptIdxIrishFlag = 4.U
+  val ptIdxItalianFlag = 5.U
+  val ptIdxBelgianFlag = 6.U
+  val ptIdxDutchFlag = 7.U
+  val ptIdxLuxembourgishFlag = 8.U
+  val ptIdxGermanFlag = 9.U
+  val ptIdxSpanishFlag = 10.U
+  val ptIdxAustrianFlag = 11.U
+  val ptIdxGreekFlag = 12.U
+  val ptIdxDanishFlag = 13.U
+  val ptIdxSwedishFlag = 14.U
+  val ptIdxFinnishFlag = 15.U
+  val ptIdxNorwegianFlag = 16.U
+  val ptIdxBlackVoid = 30.U
+  val ptIdxNotSet = 31.U
+
+  val ptIdxDefault = pt match {
+     case `ptRainbow` => ptIdxRainbow
+     case `ptVStripes` => ptIdxVStripes
+     case `ptHStripes` => ptIdxHStripes
+     case `ptFrenchFlag` => ptIdxFrenchFlag
+     case `ptIrishFlag` => ptIdxIrishFlag
+     case `ptItalianFlag` => ptIdxItalianFlag
+     case `ptBelgianFlag` => ptIdxBelgianFlag
+     case `ptDutchFlag` => ptIdxDutchFlag
+     case `ptLuxembourgishFlag` => ptIdxLuxembourgishFlag
+     case `ptGermanFlag` => ptIdxGermanFlag
+     case `ptSpanishFlag` => ptIdxSpanishFlag
+     case `ptAustrianFlag` => ptIdxAustrianFlag
+     case `ptGreekFlag` => ptIdxGreekFlag
+     case `ptDanishFlag` => ptIdxDanishFlag
+     case `ptSwedishFlag` => ptIdxSwedishFlag
+     case `ptFinnishFlag` => ptIdxFinnishFlag
+     case `ptNorwegianFlag` => ptIdxNorwegianFlag
+     case whoa => ptIdxBlackVoid
+  }
 
   val vp = VideoParams(
       H_DISPLAY = 1280, H_FRONT = 110,
@@ -48,6 +91,31 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
   val pgreen = Wire(UInt(8.W))
   val hpos = hv_sync.io.hpos
   val vpos = hv_sync.io.vpos
+
+  val ptIdx = RegInit(31.U(8.W))
+  def pressed (d: Bool) = !d && RegNext (d)
+  def counter (n: UInt) = {
+    val cntReg = RegInit(31.U(8.W))
+    when(pressed(io.I_button)){
+      cntReg := cntReg + 1.U
+    }
+    when(cntReg >= n) {
+      cntReg := 1.U
+    }
+    when(cntReg >= ptIdxNotSet) {
+      cntReg := ptIdxDefault
+    }
+    cntReg
+  }
+  val ptIdxNext = counter(17.U)
+  when((hpos === 0.U && vpos === 0.U) || ptIdx === ptIdxNotSet){
+    ptIdx := ptIdxNext
+  }
+
+  pred   := 0.U
+  pgreen := 0.U
+  pblue  := 0.U
+
   if(pt == ptRainbow){
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
@@ -91,73 +159,62 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
       pblue := 0.U
     }
   }
-  if(pt == ptVStripes){
+  when(ptIdx === ptIdxVStripes){
     pred   := Mux(0.U === hpos % 2.U, 0.U, 255.U)
     pgreen := Mux(0.U === hpos % 2.U, 0.U, 255.U)
     pblue  := Mux(0.U === hpos % 2.U, 0.U, 255.U)
-  }
-  if(pt == ptHStripes){
+  } .elsewhen(ptIdx === ptIdxHStripes){
     pred   := Mux(0.U === vpos % 2.U, 0.U, 255.U)
     pgreen := Mux(0.U === vpos % 2.U, 0.U, 255.U)
     pblue  := Mux(0.U === vpos % 2.U, 0.U, 255.U)
-  }
-  if(pt == ptFrenchFlag){
+  } .elsewhen(ptIdx === ptIdxFrenchFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
-  }
-  if(pt == ptIrishFlag){
+  } .elsewhen(ptIdx === ptIdxIrishFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 2.U)
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
-  }
-  if(pt == ptItalianFlag){
+  } .elsewhen(ptIdx === ptIdxItalianFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
-  }
-  if(pt == ptBelgianFlag){
+  } .elsewhen(ptIdx === ptIdxBelgianFlag){
     val swidth = 1280
     pred := Mux(hpos >= (swidth/3).U, 255.U, 0.U)
     pgreen := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := 0.U
-  }
-  if(pt == ptDutchFlag){
+  } .elsewhen(ptIdx === ptIdxDutchFlag){
     val sheight = 720
     val prbright = Mux(vpos < (sheight/3).U, 2.U, 255.U)
     val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 2.U)
     pred := Mux(vpos < (sheight*2/3).U, prbright, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, pbbright)
-  }
-  if(pt == ptLuxembourgishFlag){
+  } .elsewhen(ptIdx === ptIdxLuxembourgishFlag){
     val sheight = 720
     pred := Mux(vpos < (sheight*2/3).U, 255.U, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, 255.U)
-  }
-  if(pt == ptGermanFlag){
+  } .elsewhen(ptIdx === ptIdxGermanFlag){
     val sheight = 720
     pred := Mux(vpos >= (sheight/3).U, 255.U, 0.U)
     pgreen := Mux(vpos < (sheight*2/3).U, 0.U, 255.U)
     pblue := 0.U
-  }
-  if(pt == ptSpanishFlag){
+  } .elsewhen(ptIdx === ptIdxSpanishFlag){
     val sheight = 720
     pred := 255.U
     pgreen := Mux((vpos >= (sheight/4).U) && (vpos < (sheight*3/4).U), 255.U, 0.U)
     pblue := 0.U
-  }
-  if(pt == ptAustrianFlag){
+  } .elsewhen(ptIdx === ptIdxAustrianFlag){
     val sheight = 720
     pred := 255.U
     pgreen :=  Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
-  }
-  if(pt == ptGreekFlag){
+  } .elsewhen(ptIdx === ptIdxGreekFlag){
     val swidth = 1280
     val sheight = 720
     val swstep = swidth*3/80
@@ -168,8 +225,7 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     pred := Mux(vpos % (sheight*2/9).U > (sheight/9).U, ninv, pinv)
     pgreen := Mux(vpos % (sheight*2/9).U > (sheight/9).U, ninv, pinv)
     pblue := 255.U
-  }
-  if(pt == ptDanishFlag){
+  } .elsewhen(ptIdx === ptIdxDanishFlag){
     val swidth = 1280
     val sheight = 720
     val swstep = swidth*4/37
@@ -178,8 +234,7 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     pred := 255.U
     pgreen := Mux((vpos > (shstep*3).U) && (vpos <= (shstep*4).U), 255.U, pinv)
     pblue := Mux((vpos > (shstep*3).U) && (vpos <= (shstep*4).U), 255.U, pinv)
-  }
-  if(pt == ptSwedishFlag){
+  } .elsewhen(ptIdx === ptIdxSwedishFlag){
     val swidth = 1280
     val sheight = 720
     val swstep = swidth/16
@@ -189,8 +244,7 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     pred := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, pinv)
     pgreen := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, pinv)
     pblue := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 0.U, ninv)
-  }
-  if(pt == ptFinnishFlag){
+  } .elsewhen(ptIdx === ptIdxFinnishFlag){
     val swidth = 1280
     val sheight = 720
     val swstep = swidth/18
@@ -199,8 +253,7 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     pred := Mux((vpos > (shstep*4).U) && (vpos <= (shstep*7).U), 0.U, ninv)
     pgreen := Mux((vpos > (shstep*4).U) && (vpos <= (shstep*7).U), 0.U, ninv)
     pblue := 255.U
-  }
-  if(pt == ptNorwegianFlag){
+  } .elsewhen(ptIdx === ptIdxNorwegianFlag){
     val swidth = 1280
     val sheight = 720
     val swstep = swidth/22

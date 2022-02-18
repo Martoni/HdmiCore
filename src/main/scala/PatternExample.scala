@@ -93,7 +93,43 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
   val vpos = hv_sync.io.vpos
 
   val ptIdx = RegInit(31.U(8.W))
-  def pressed (d: Bool) = !d && RegNext (d)
+  val fac: Int = 100000000/100
+
+  /* button debounce from https://github.com/schoeberl/chisel-book/blob/master/src/main/scala/Debounce.scala */
+  //- start input_func
+  def sync(v: Bool) = RegNext(RegNext(v))
+
+  def rising(v: Bool) = v & !RegNext(v)
+
+  def tickGen() = {
+    val reg = RegInit(0.U(log2Up(fac).W))
+    val tick = reg === (fac-1).U
+    reg := Mux(tick, 0.U, reg + 1.U)
+    tick
+  }
+
+  def filter(v: Bool, t: Bool) = {
+    val reg = RegInit(0.U(3.W))
+    when (t) {
+      reg := reg(1, 0) ## v
+    }
+    (reg(2) & reg(1)) | (reg(2) & reg(0)) | (reg(1) & reg(0))
+  }
+
+  def pressed (d: Bool) = {
+    val btnSync = sync(!d)
+
+    val tick = tickGen()
+    val btnDeb = Reg(Bool())
+    when (tick) {
+      btnDeb := btnSync
+    }
+
+    val btnClean = filter(btnDeb, tick)
+    val risingEdge = rising(btnClean)
+    risingEdge
+  }
+
   def counter (n: UInt) = {
     val cntReg = RegInit(31.U(8.W))
     when(pressed(io.I_button)){

@@ -27,7 +27,7 @@ case object ptFinnishFlag extends PatternType
 case object ptNorwegianFlag extends PatternType
 
 
-class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
+class PatternExample(pt: PatternType = ptRainbow) extends Module {
   val io = IO(new Bundle {
     val serClk = Input(Clock())
     val tmds = Output(new Tmds())
@@ -136,7 +136,7 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
       cntReg := cntReg + 1.U
     }
     when(cntReg >= n) {
-      cntReg := 1.U
+      cntReg := 0.U
     }
     when(cntReg >= ptIdxNotSet) {
       cntReg := ptIdxDefault
@@ -148,11 +148,13 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     ptIdx := ptIdxNext
   }
 
-  pred   := 0.U
-  pgreen := 0.U
-  pblue  := 0.U
-
-  if(pt == ptRainbow){
+  when(ptIdx === ptIdxRainbow){
+    def bswap3(v: UInt) = ((v & 1.U) << 2.U) + (v & 2.U) + ((v & 4.U) >> 2.U)
+    def cFix (n: UInt) = {
+      val a = bswap3(n/32.U) << 1.U
+      val o = Mux(a < 15.U, a, 255.U)
+      o
+    }
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
     val cTrig1 = 255.U
@@ -165,20 +167,20 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     when(x < cTrig1){
       pred := cTrig1
     }.elsewhen(x < cTrig2) {
-      pred := cTrig2 - x
+      pred := cFix(cTrig2 - x)
     }.elsewhen(x < cTrig4){
       pred := 0.U
     }.elsewhen(x < cTrig5){
-      pred := x - cTrig4
+      pred := cFix(x - cTrig4)
     }.otherwise{
       pred := cTrig1
     }
     when(x < cTrig1){
-      pgreen := x 
+      pgreen := cFix(x)
     }.elsewhen(x < cTrig3){
       pgreen := cTrig1
     }.elsewhen(x < cTrig4){
-      pgreen := cTrig4 - x
+      pgreen := cFix(cTrig4 - x)
     }.otherwise{
       pgreen := 0.U
     }
@@ -186,16 +188,15 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     when(x < cTrig2){
       pblue := 0.U
     }.elsewhen(x < cTrig3){
-      pblue := x - cTrig2
+      pblue := cFix(x - cTrig2)
     }.elsewhen(x < cTrig5){
       pblue := cTrig1
     }.elsewhen(x < cTrig6){
-      pblue := cTrig6 - x
+      pblue := cFix(cTrig6 - x)
     }.otherwise {
       pblue := 0.U
     }
-  }
-  when(ptIdx === ptIdxVStripes){
+  } .elsewhen(ptIdx === ptIdxVStripes){
     pred   := Mux(0.U === hpos % 2.U, 0.U, 255.U)
     pgreen := Mux(0.U === hpos % 2.U, 0.U, 255.U)
     pblue  := Mux(0.U === hpos % 2.U, 0.U, 255.U)
@@ -305,6 +306,10 @@ class PatternExample(pt: PatternType = ptFrenchFlag) extends Module {
     pred := Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, ninv)
     pgreen := Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
     pblue := Mux((vpos > (shstep*6).U) && (vpos <= (shstep*10).U), pbbright, pinv)
+  } .otherwise {
+    pred   := 0.U
+    pgreen := 0.U
+    pblue  := 0.U
   }
 
   /* hdmi transmission */

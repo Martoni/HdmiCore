@@ -149,11 +149,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   }
 
   when(ptIdx === ptIdxRainbow){
-    def bswap3(v: UInt) = ((v & 1.U) << 2.U) + (v & 2.U) + ((v & 4.U) >> 2.U)
-    def cFix (n: UInt) = {
-      val a = bswap3(n/32.U) << 1.U
-      val o = Mux(a < 15.U, a, 255.U)
-      o
+    def cFix (v: UInt) = {
+      ((v & 128.U) >> 6.U) + ((v & 64.U) >> 4.U) + ((v & 32.U) >> 2.U)
     }
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */

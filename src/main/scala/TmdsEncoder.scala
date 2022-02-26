@@ -19,13 +19,9 @@ class TMDSEncoder extends Module {
     val vin = VecInit(value.asBools)
     val res = VecInit(511.U.asBools)
     res(0) := vin(0)
-    res(1) := res(0) ^ vin(1)
-    res(2) := res(1) ^ vin(2)
-    res(3) := res(2) ^ vin(3)
-    res(4) := res(3) ^ vin(4)
-    res(5) := res(4) ^ vin(5)
-    res(6) := res(5) ^ vin(6)
-    res(7) := res(6) ^ vin(7)
+    for(i <- 1 to 7){
+      res(i) := res(i-1) ^ vin(i)
+    }
     res(8) := 1.U
     res.asUInt
   }
@@ -36,16 +32,11 @@ class TMDSEncoder extends Module {
     val vin = VecInit(value.asBools)
     val res = VecInit(511.U.asBools)
     res(0) := vin(0)
-    res(1) := !(res(0) ^ vin(1))
-    res(2) := !(res(1) ^ vin(2))
-    res(3) := !(res(2) ^ vin(3))
-    res(4) := !(res(3) ^ vin(4))
-    res(5) := !(res(4) ^ vin(5))
-    res(6) := !(res(5) ^ vin(6))
-    res(7) := !(res(6) ^ vin(7))
+    for(i <- 1 to 7){
+      res(i) := !(res(i-1) ^ vin(i))
+    }
     res(8) := 0.U
     res.asUInt
-
   }
   val xnored = xnorfct(io.din)
 

@@ -64,7 +64,7 @@ class TMDSEncoder extends Module {
     when(disparityReg === 0.S || diff === 0.S){
       /* xnored data */
       when(q_m(8) === false.B){
-        doutReg := "b10".U(2.W) ## q_m(7, 0)
+        doutReg := "b10".U(2.W) ## ~q_m(7, 0)
         disparityReg := disparityReg - diff
       }.otherwise{
         doutReg := "b01".U(2.W) ## q_m(7, 0)

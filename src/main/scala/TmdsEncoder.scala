@@ -16,23 +16,38 @@ class TMDSEncoder extends Module {
   val n_one_din = PopCount(io.din)
   /* create xor encodings */
   def xorfct(value: UInt): UInt = {
-    value.getWidth match {
-      case 1 => value(0)
-      case s => val res = xorfct(VecInit(value.asBools.drop(1)).asUInt)
-          value.asBools.head ^ res.asBools.head ## res
-    }
+    val vin = VecInit(value.asBools)
+    val res = VecInit(511.U.asBools)
+    res(0) := vin(0)
+    res(1) := res(0) ^ vin(1)
+    res(2) := res(1) ^ vin(2)
+    res(3) := res(2) ^ vin(3)
+    res(4) := res(3) ^ vin(4)
+    res(5) := res(4) ^ vin(5)
+    res(6) := res(5) ^ vin(6)
+    res(7) := res(6) ^ vin(7)
+    res(8) := 1.U
+    res.asUInt
   }
-  val xored = 1.U(1.W) ## xorfct(io.din)
+  val xored = xorfct(io.din)
 
   /* create xnor encodings */
   def xnorfct(value: UInt): UInt = {
-    value.getWidth match {
-      case 1 => value(0)
-      case s => val res = xnorfct(VecInit(value.asBools.drop(1)).asUInt)
-          !(value.asBools.head ^ res.asBools.head) ## res
-    }
+    val vin = VecInit(value.asBools)
+    val res = VecInit(511.U.asBools)
+    res(0) := vin(0)
+    res(1) := !(res(0) ^ vin(1))
+    res(2) := !(res(1) ^ vin(2))
+    res(3) := !(res(2) ^ vin(3))
+    res(4) := !(res(3) ^ vin(4))
+    res(5) := !(res(4) ^ vin(5))
+    res(6) := !(res(5) ^ vin(6))
+    res(7) := !(res(6) ^ vin(7))
+    res(8) := 0.U
+    res.asUInt
+
   }
-  val xnored = 0.U(1.W) ## xnorfct(io.din)
+  val xnored = xnorfct(io.din)
 
   /* use xnored or xored data based on the ones */
   val q_m = Mux(

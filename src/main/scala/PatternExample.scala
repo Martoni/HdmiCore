@@ -148,9 +148,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     ptIdx := ptIdxNext
   }
 
-  def cFix (v: UInt) = {
-    ((v & 128.U) >> 6.U) + ((v & 64.U) >> 4.U) + ((v & 32.U) >> 2.U)
-  }
+  def cFix (v: UInt) = v & 240.U
   when(ptIdx === ptIdxRainbow){
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */

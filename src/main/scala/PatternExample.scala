@@ -148,10 +148,10 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     ptIdx := ptIdxNext
   }
 
+  def cFix (v: UInt) = {
+    ((v & 128.U) >> 6.U) + ((v & 64.U) >> 4.U) + ((v & 32.U) >> 2.U)
+  }
   when(ptIdx === ptIdxRainbow){
-    def cFix (v: UInt) = {
-      ((v & 128.U) >> 6.U) + ((v & 64.U) >> 4.U) + ((v & 32.U) >> 2.U)
-    }
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
     val cTrig1 = 255.U
@@ -209,7 +209,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   } .elsewhen(ptIdx === ptIdxIrishFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
-    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 2.U)
+    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, cFix(128.U))
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxItalianFlag){
     val swidth = 1280
@@ -223,8 +223,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxDutchFlag){
     val sheight = 720
-    val prbright = Mux(vpos < (sheight/3).U, 2.U, 255.U)
-    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 2.U)
+    val prbright = Mux(vpos < (sheight/3).U, cFix(128.U), 255.U)
+    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, cFix(128.U))
     pred := Mux(vpos < (sheight*2/3).U, prbright, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, pbbright)
@@ -296,8 +296,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     val linv = Mux(((hpos > (swstep*6).U) && (hpos <= (swstep*7).U)) || ((hpos > (swstep*9).U) && (hpos <= (swstep*10).U)), minv, 0.U)
     val kinv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, 255.U)
     val pgbright = Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
-    val prbright = Mux(pgbright > 0.U, 255.U, 2.U)
-    val pbbright = Mux(pgbright > 0.U, 255.U, 2.U)
+    val prbright = Mux(pgbright > 0.U, 255.U, cFix(128.U))
+    val pbbright = Mux(pgbright > 0.U, 255.U, cFix(128.U))
     val pinv = Mux((hpos > (swstep*6).U) && (hpos <= (swstep*10).U), pbbright, 0.U)
     val ninv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, prbright)
     pred := Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, ninv)

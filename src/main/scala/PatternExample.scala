@@ -149,7 +149,11 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   }
 
   def cFix (v: UInt) = v & 240.U
-  when(ptIdx === ptIdxRainbow){
+  when(!video_de){
+    pred := 0.U
+    pgreen := 0.U
+    pblue := 0.U
+  } .elsewhen(ptIdx === ptIdxRainbow){
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
     val cTrig1 = 255.U
@@ -312,9 +316,9 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   rgb2tmds.io.videoSig.de := video_de 
   rgb2tmds.io.videoSig.hsync := hv_sync.io.hsync
   rgb2tmds.io.videoSig.vsync := hv_sync.io.vsync
-  rgb2tmds.io.videoSig.pixel.red   := Mux(video_de, pred, 0.U)
-  rgb2tmds.io.videoSig.pixel.green := Mux(video_de, pgreen, 0.U)
-  rgb2tmds.io.videoSig.pixel.blue  := Mux(video_de, pblue, 0.U)
+  rgb2tmds.io.videoSig.pixel.red   := pred
+  rgb2tmds.io.videoSig.pixel.green := pgreen
+  rgb2tmds.io.videoSig.pixel.blue  := pblue
 
   /* serdes */
   // Blue -> data 0

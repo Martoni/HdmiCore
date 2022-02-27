@@ -25,6 +25,8 @@ case object ptDanishFlag extends PatternType
 case object ptSwedishFlag extends PatternType
 case object ptFinnishFlag extends PatternType
 case object ptNorwegianFlag extends PatternType
+case object ptVGradient extends PatternType
+case object ptHGradient extends PatternType
 
 
 class PatternExample(pt: PatternType = ptRainbow) extends Module {
@@ -52,6 +54,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   val ptIdxSwedishFlag = 14.U
   val ptIdxFinnishFlag = 15.U
   val ptIdxNorwegianFlag = 16.U
+  val ptIdxVGradient = 17.U
+  val ptIdxHGradient = 18.U
   val ptIdxBlackVoid = 30.U
   val ptIdxNotSet = 31.U
 
@@ -73,6 +77,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
      case `ptSwedishFlag` => ptIdxSwedishFlag
      case `ptFinnishFlag` => ptIdxFinnishFlag
      case `ptNorwegianFlag` => ptIdxNorwegianFlag
+     case `ptVGradient` => ptIdxVGradient
+     case `ptHGradient` => ptIdxHGradient
      case whoa => ptIdxBlackVoid
   }
 
@@ -143,7 +149,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     }
     cntReg
   }
-  val ptIdxNext = counter(17.U)
+  val ptIdxNext = counter(19.U)
   when((hpos === 0.U && vpos === 0.U) || ptIdx === ptIdxNotSet){
     ptIdx := ptIdxNext
   }
@@ -153,6 +159,16 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     pred := 0.U
     pgreen := 0.U
     pblue := 0.U
+  } .elsewhen(ptIdx === ptIdxVGradient){
+    val x = RegNext((vpos*255.U)/vp.V_DISPLAY.U)
+    pred := cFix(x)
+    pgreen := cFix(x)
+    pblue := 0.U
+  } .elsewhen(ptIdx === ptIdxHGradient){
+    val x = RegNext((hpos*255.U)/vp.H_DISPLAY.U)
+    pred := 0.U
+    pgreen := 0.U
+    pblue := cFix(x)
   } .elsewhen(ptIdx === ptIdxRainbow){
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */

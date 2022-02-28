@@ -41,7 +41,8 @@ class TMDSEncoder extends Module {
   val xnored = xnorfct(io.din)
 
   /* use xnored or xored data based on the ones */
-  val q_m = Mux(
+  val q_m = RegInit(0.U(9.W))
+  q_m := Mux(
     (n_one_din > 4.U) || (n_one_din === 4.U && io.din(0) === 0.U),
     xnored, xored)
 

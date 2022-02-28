@@ -46,8 +46,9 @@ class TMDSEncoder extends Module {
     xnored, xored)
 
   /* ones counter for internal data */
-  val diff = PopCount(q_m).asSInt - 4.S
-  val diffSize = diff.getWidth
+  val diffSize = 4
+  val diff = RegInit(0.S(diffSize.W))
+  diff := PopCount(q_m).asSInt - 4.S
 
   val disparitySize = 4
   val disparityReg = RegInit(0.S(disparitySize.W))

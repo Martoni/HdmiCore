@@ -154,7 +154,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     ptIdx := ptIdxNext
   }
 
-  def cFix (v: UInt) = v & 240.U
+  def cFix (v: UInt) = v /*& 240.U*/
   when(!video_de){
     pred := 0.U
     pgreen := 0.U

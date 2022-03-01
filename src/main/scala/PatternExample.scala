@@ -154,21 +154,21 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     ptIdx := ptIdxNext
   }
 
-  def cFix (v: UInt) = v /*& 240.U*/
+
   when(!video_de){
     pred := 0.U
     pgreen := 0.U
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxVGradient){
     val x = RegNext((vpos*255.U)/vp.V_DISPLAY.U)
-    pred := cFix(x)
-    pgreen := cFix(x)
+    pred := x
+    pgreen := x
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxHGradient){
     val x = RegNext((hpos*255.U)/vp.H_DISPLAY.U)
     pred := 0.U
     pgreen := 0.U
-    pblue := cFix(x)
+    pblue := x
   } .elsewhen(ptIdx === ptIdxRainbow){
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
@@ -182,20 +182,20 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     when(x < cTrig1){
       pred := cTrig1
     }.elsewhen(x < cTrig2) {
-      pred := cFix(cTrig2 - x)
+      pred := cTrig2 - x
     }.elsewhen(x < cTrig4){
       pred := 0.U
     }.elsewhen(x < cTrig5){
-      pred := cFix(x - cTrig4)
+      pred := x - cTrig4
     }.otherwise{
       pred := cTrig1
     }
     when(x < cTrig1){
-      pgreen := cFix(x)
+      pgreen := x
     }.elsewhen(x < cTrig3){
       pgreen := cTrig1
     }.elsewhen(x < cTrig4){
-      pgreen := cFix(cTrig4 - x)
+      pgreen := cTrig4 - x
     }.otherwise{
       pgreen := 0.U
     }
@@ -203,11 +203,11 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     when(x < cTrig2){
       pblue := 0.U
     }.elsewhen(x < cTrig3){
-      pblue := cFix(x - cTrig2)
+      pblue := x - cTrig2
     }.elsewhen(x < cTrig5){
       pblue := cTrig1
     }.elsewhen(x < cTrig6){
-      pblue := cFix(cTrig6 - x)
+      pblue := cTrig6 - x
     }.otherwise {
       pblue := 0.U
     }
@@ -227,7 +227,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   } .elsewhen(ptIdx === ptIdxIrishFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
-    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, cFix(128.U))
+    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 128.U)
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxItalianFlag){
     val swidth = 1280
@@ -241,8 +241,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxDutchFlag){
     val sheight = 720
-    val prbright = Mux(vpos < (sheight/3).U, cFix(128.U), 255.U)
-    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, cFix(128.U))
+    val prbright = Mux(vpos < (sheight/3).U, 128.U, 255.U)
+    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 128.U)
     pred := Mux(vpos < (sheight*2/3).U, prbright, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, pbbright)
@@ -314,8 +314,8 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     val linv = Mux(((hpos > (swstep*6).U) && (hpos <= (swstep*7).U)) || ((hpos > (swstep*9).U) && (hpos <= (swstep*10).U)), minv, 0.U)
     val kinv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, 255.U)
     val pgbright = Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
-    val prbright = Mux(pgbright > 0.U, 255.U, cFix(128.U))
-    val pbbright = Mux(pgbright > 0.U, 255.U, cFix(128.U))
+    val prbright = Mux(pgbright > 0.U, 255.U, 128.U)
+    val pbbright = Mux(pgbright > 0.U, 255.U, 128.U)
     val pinv = Mux((hpos > (swstep*6).U) && (hpos <= (swstep*10).U), pbbright, 0.U)
     val ninv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, prbright)
     pred := Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, ninv)

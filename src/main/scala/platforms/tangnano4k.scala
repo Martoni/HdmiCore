@@ -10,6 +10,16 @@ import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import fpgamacro.gowin.{CLKDIV, TMDS_PLLVR, TLVDS_OBUF}
 import hdmicore.PatternExample
 
+class DiffPair extends Bundle {
+    val p = Bool()
+    val n = Bool()
+}
+
+class TMDSDiff extends Bundle {
+    val clk  = new DiffPair()
+    val data = Vec(3, new DiffPair())
+}
+
 class TangNano4k extends RawModule {
 
     /************/
@@ -22,17 +32,14 @@ class TangNano4k extends RawModule {
     val O_led = IO(Output(UInt(2.W)))
 
     /* TMDS (HDMI) signals */
-    val O_tmds_clk_p  = IO(Output(Bool()))
-    val O_tmds_clk_n  = IO(Output(Bool()))
-    val O_tmds_data_p = IO(Output(UInt(3.W)))
-    val O_tmds_data_n = IO(Output(UInt(3.W)))
+    val O_tmds = IO(Output(new TMDSDiff()))
 
     /* button */
     val I_button = IO(Input(Bool()))
-    val O_trig = IO(Output(Bool()))
+
     /********************************************/
 
-    O_trig := I_button
+
 
     O_led := 1.U(2.W)
 
@@ -64,6 +71,7 @@ class TangNano4k extends RawModule {
 
       val patternExample = Module(new PatternExample())
       patternExample.io.serClk := serial_clk
+      patternExample.io.I_button := I_button
 
       /* LVDS output */
       val buffDiffBlue = Module(new TLVDS_OBUF())
@@ -75,10 +83,14 @@ class TangNano4k extends RawModule {
       val buffDiffClk = Module(new TLVDS_OBUF())
       buffDiffClk.io.I := patternExample.io.tmds.clk
 
-      O_tmds_clk_p  := buffDiffClk.io.O
-      O_tmds_clk_n  := buffDiffClk.io.OB
-      O_tmds_data_p := buffDiffRed.io.O ## buffDiffGreen.io.O ## buffDiffBlue.io.O
-      O_tmds_data_n := buffDiffRed.io.OB ## buffDiffGreen.io.OB ## buffDiffBlue.io.OB
+      O_tmds.data(0).p := buffDiffBlue.io.O
+      O_tmds.data(0).n := buffDiffBlue.io.OB
+      O_tmds.data(1).p := buffDiffGreen.io.O
+      O_tmds.data(1).n := buffDiffGreen.io.OB
+      O_tmds.data(2).p := buffDiffRed.io.O
+      O_tmds.data(2).n := buffDiffRed.io.OB
+      O_tmds.clk.p := buffDiffClk.io.O
+      O_tmds.clk.n := buffDiffClk.io.OB
     }
 }
 

@@ -8,17 +8,7 @@ import chisel3.util._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 import fpgamacro.gowin.{CLKDIV, TMDS_PLLVR, TLVDS_OBUF}
-import hdmicore.PatternExample
-
-class DiffPair extends Bundle {
-    val p = Bool()
-    val n = Bool()
-}
-
-class TMDSDiff extends Bundle {
-    val clk  = new DiffPair()
-    val data = Vec(3, new DiffPair())
-}
+import hdmicore.{PatternExample, TMDSDiff, DiffPair}
 
 class TangNano4k extends RawModule {
 

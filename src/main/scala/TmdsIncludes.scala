@@ -21,3 +21,14 @@ class Tmds extends Bundle {
   val clk = Bool()
   val data = UInt(3.W)
 }
+
+class DiffPair extends Bundle {
+    val p = Bool()
+    val n = Bool()
+}
+
+class TMDSDiff extends Bundle {
+    val clk  = new DiffPair()
+    val data = Vec(3, new DiffPair())
+}
+

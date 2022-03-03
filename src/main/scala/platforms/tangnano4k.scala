@@ -29,8 +29,6 @@ class TangNano4k extends RawModule {
 
     /********************************************/
 
-
-
     O_led := 1.U(2.W)
 
     val pll_lock =  Wire(Bool())

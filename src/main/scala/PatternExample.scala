@@ -25,9 +25,10 @@ case object ptDanishFlag extends PatternType
 case object ptSwedishFlag extends PatternType
 case object ptFinnishFlag extends PatternType
 case object ptNorwegianFlag extends PatternType
+case object ptUkraineFlag extends PatternType
 
 
-class PatternExample(pt: PatternType = ptRainbow) extends Module {
+class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
   val io = IO(new Bundle {
     val serClk = Input(Clock())
     val tmds = Output(new Tmds())
@@ -44,7 +45,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   val ptIdxBelgianFlag = 6.U
   val ptIdxDutchFlag = 7.U
   val ptIdxLuxembourgishFlag = 8.U
-  val ptIdxGermanFlag = 9.U
+  val ptIdxUkraineFlag = 9.U
   val ptIdxSpanishFlag = 10.U
   val ptIdxAustrianFlag = 11.U
   val ptIdxGreekFlag = 12.U
@@ -52,6 +53,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
   val ptIdxSwedishFlag = 14.U
   val ptIdxFinnishFlag = 15.U
   val ptIdxNorwegianFlag = 16.U
+  val ptIdxGermanFlag = 17.U
   val ptIdxBlackVoid = 30.U
   val ptIdxNotSet = 31.U
 
@@ -73,6 +75,7 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
      case `ptSwedishFlag` => ptIdxSwedishFlag
      case `ptFinnishFlag` => ptIdxFinnishFlag
      case `ptNorwegianFlag` => ptIdxNorwegianFlag
+     case `ptUkraineFlag` => ptIdxUkraineFlag
      case whoa => ptIdxBlackVoid
   }
 
@@ -303,6 +306,12 @@ class PatternExample(pt: PatternType = ptRainbow) extends Module {
     pred := Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, ninv)
     pgreen := Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
     pblue := Mux((vpos > (shstep*6).U) && (vpos <= (shstep*10).U), pbbright, pinv)
+  } .elsewhen(ptIdx === ptIdxUkraineFlag){
+   /* blue #00 57 b7, yellow #ff d7 00  */
+    val sheight = 720
+    pred  := Mux(vpos <= (sheight/2).U, "h00".U, "hFF".U)
+    pgreen:= Mux(vpos <= (sheight/2).U, "h00".U, "hFF".U)
+    pblue := Mux(vpos <= (sheight/2).U, "hFF".U, "h00".U)
   } .otherwise {
     pred   := 0.U
     pgreen := 0.U

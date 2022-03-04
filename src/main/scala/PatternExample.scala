@@ -26,6 +26,8 @@ case object ptSwedishFlag extends PatternType
 case object ptFinnishFlag extends PatternType
 case object ptNorwegianFlag extends PatternType
 case object ptUkraineFlag extends PatternType
+case object ptVGradient extends PatternType
+case object ptHGradient extends PatternType
 
 
 class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
@@ -54,6 +56,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
   val ptIdxFinnishFlag = 15.U
   val ptIdxNorwegianFlag = 16.U
   val ptIdxGermanFlag = 17.U
+  val ptIdxVGradient = 18.U
+  val ptIdxHGradient = 19.U
   val ptIdxBlackVoid = 30.U
   val ptIdxNotSet = 31.U
 
@@ -76,6 +80,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
      case `ptFinnishFlag` => ptIdxFinnishFlag
      case `ptNorwegianFlag` => ptIdxNorwegianFlag
      case `ptUkraineFlag` => ptIdxUkraineFlag
+     case `ptVGradient` => ptIdxVGradient
+     case `ptHGradient` => ptIdxHGradient
      case whoa => ptIdxBlackVoid
   }
 
@@ -146,7 +152,7 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     }
     cntReg
   }
-  val ptIdxNext = counter(19.U)
+  val ptIdxNext = counter(20.U)
   when((hpos === 0.U && vpos === 0.U) || ptIdx === ptIdxNotSet){
     ptIdx := ptIdxNext
   }

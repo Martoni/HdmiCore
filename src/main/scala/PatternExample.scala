@@ -146,15 +146,27 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     }
     cntReg
   }
-  val ptIdxNext = counter(17.U)
+  val ptIdxNext = counter(19.U)
   when((hpos === 0.U && vpos === 0.U) || ptIdx === ptIdxNotSet){
     ptIdx := ptIdxNext
   }
 
-  when(ptIdx === ptIdxRainbow){
-    def cFix (v: UInt) = {
-      ((v & 128.U) >> 6.U) + ((v & 64.U) >> 4.U) + ((v & 32.U) >> 2.U)
-    }
+
+  when(!video_de){
+    pred := 0.U
+    pgreen := 0.U
+    pblue := 0.U
+  } .elsewhen(ptIdx === ptIdxVGradient){
+    val x = RegNext((vpos*255.U)/vp.V_DISPLAY.U)
+    pred := x
+    pgreen := x
+    pblue := 0.U
+  } .elsewhen(ptIdx === ptIdxHGradient){
+    val x = RegNext((hpos*255.U)/vp.H_DISPLAY.U)
+    pred := 0.U
+    pgreen := 0.U
+    pblue := x
+  } .elsewhen(ptIdx === ptIdxRainbow){
     /* generate rainbow */
     /* inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ */
     val cTrig1 = 255.U
@@ -167,20 +179,20 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     when(x < cTrig1){
       pred := cTrig1
     }.elsewhen(x < cTrig2) {
-      pred := cFix(cTrig2 - x)
+      pred := cTrig2 - x
     }.elsewhen(x < cTrig4){
       pred := 0.U
     }.elsewhen(x < cTrig5){
-      pred := cFix(x - cTrig4)
+      pred := x - cTrig4
     }.otherwise{
       pred := cTrig1
     }
     when(x < cTrig1){
-      pgreen := cFix(x)
+      pgreen := x
     }.elsewhen(x < cTrig3){
       pgreen := cTrig1
     }.elsewhen(x < cTrig4){
-      pgreen := cFix(cTrig4 - x)
+      pgreen := cTrig4 - x
     }.otherwise{
       pgreen := 0.U
     }
@@ -188,11 +200,11 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     when(x < cTrig2){
       pblue := 0.U
     }.elsewhen(x < cTrig3){
-      pblue := cFix(x - cTrig2)
+      pblue := x - cTrig2
     }.elsewhen(x < cTrig5){
       pblue := cTrig1
     }.elsewhen(x < cTrig6){
-      pblue := cFix(cTrig6 - x)
+      pblue := cTrig6 - x
     }.otherwise {
       pblue := 0.U
     }
@@ -212,7 +224,7 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
   } .elsewhen(ptIdx === ptIdxIrishFlag){
     val swidth = 1280
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
-    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 2.U)
+    pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 128.U)
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxItalianFlag){
     val swidth = 1280
@@ -226,8 +238,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxDutchFlag){
     val sheight = 720
-    val prbright = Mux(vpos < (sheight/3).U, 2.U, 255.U)
-    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 2.U)
+    val prbright = Mux(vpos < (sheight/3).U, 128.U, 255.U)
+    val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 128.U)
     pred := Mux(vpos < (sheight*2/3).U, prbright, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, pbbright)
@@ -299,8 +311,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     val linv = Mux(((hpos > (swstep*6).U) && (hpos <= (swstep*7).U)) || ((hpos > (swstep*9).U) && (hpos <= (swstep*10).U)), minv, 0.U)
     val kinv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, 255.U)
     val pgbright = Mux(((vpos > (shstep*6).U) && (vpos <= (shstep*7).U)) || ((vpos > (shstep*9).U) && (vpos <= (shstep*10).U)), kinv, linv)
-    val prbright = Mux(pgbright > 0.U, 255.U, 2.U)
-    val pbbright = Mux(pgbright > 0.U, 255.U, 2.U)
+    val prbright = Mux(pgbright > 0.U, 255.U, 128.U)
+    val pbbright = Mux(pgbright > 0.U, 255.U, 128.U)
     val pinv = Mux((hpos > (swstep*6).U) && (hpos <= (swstep*10).U), pbbright, 0.U)
     val ninv = Mux((hpos > (swstep*7).U) && (hpos <= (swstep*9).U), 0.U, prbright)
     pred := Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, ninv)
@@ -323,9 +335,9 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
   rgb2tmds.io.videoSig.de := video_de 
   rgb2tmds.io.videoSig.hsync := hv_sync.io.hsync
   rgb2tmds.io.videoSig.vsync := hv_sync.io.vsync
-  rgb2tmds.io.videoSig.pixel.red   := Mux(video_de, pred, 0.U)
-  rgb2tmds.io.videoSig.pixel.green := Mux(video_de, pgreen, 0.U)
-  rgb2tmds.io.videoSig.pixel.blue  := Mux(video_de, pblue, 0.U)
+  rgb2tmds.io.videoSig.pixel.red   := pred
+  rgb2tmds.io.videoSig.pixel.green := pgreen
+  rgb2tmds.io.videoSig.pixel.blue  := pblue
 
   /* serdes */
   // Blue -> data 0

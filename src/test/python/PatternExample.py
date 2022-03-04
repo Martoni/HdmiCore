@@ -57,9 +57,6 @@ class VideoParams:
         self.V_DISPLAY = height
 
 
-def cFix(v):
-  return v # (v & 128) + (v & 64) + (v & 32) + (v & 16)
-
 def Mux(c, a, b):
   if c:
     return a
@@ -79,7 +76,7 @@ def pattern(ptIdx):
   ptIdxBelgianFlag = 6
   ptIdxDutchFlag = 7
   ptIdxLuxembourgishFlag = 8
-  ptIdxGermanFlag = 9
+  ptIdxUkraineFlag = 9
   ptIdxSpanishFlag = 10
   ptIdxAustrianFlag = 11
   ptIdxGreekFlag = 12
@@ -87,8 +84,9 @@ def pattern(ptIdx):
   ptIdxSwedishFlag = 14
   ptIdxFinnishFlag = 15
   ptIdxNorwegianFlag = 16
-  ptIdxVGradient = 17
-  ptIdxHGradient = 18
+  ptIdxGermanFlag = 17
+  ptIdxVGradient = 18
+  ptIdxHGradient = 19
   ptIdxBlackVoid = 30
   ptIdxNotSet = 31
 
@@ -101,7 +99,7 @@ def pattern(ptIdx):
       ptIdxBelgianFlag: 'BelgianFlag',
       ptIdxDutchFlag: 'DutchFlag',
       ptIdxLuxembourgishFlag: 'LuxembourgishFlag',
-      ptIdxGermanFlag: 'GermanFlag',
+      ptIdxUkraineFlag: 'UkraineFlag',
       ptIdxSpanishFlag: 'SpanishFlag',
       ptIdxAustrianFlag: 'AustrianFlag',
       ptIdxGreekFlag: 'GreekFlag',
@@ -109,6 +107,7 @@ def pattern(ptIdx):
       ptIdxSwedishFlag: 'SwedishFlag',
       ptIdxFinnishFlag: 'FinnishFlag',
       ptIdxNorwegianFlag: 'NorwegianFlag',
+      ptIdxGermanFlag: 'GermanFlag',
       ptIdxVGradient: 'VGradient',
       ptIdxHGradient: 'HGradient',
       ptIdxBlackVoid: 'BlackVoid',
@@ -128,14 +127,14 @@ def pattern(ptIdx):
         pblue = 0
       elif(ptIdx == ptIdxVGradient):
         x = RegNext((vpos*255)/vp.V_DISPLAY)
-        pred = cFix(x)
-        pgreen = cFix(x)
+        pred = x
+        pgreen = x
         pblue = 0
       elif(ptIdx == ptIdxHGradient):
         x = RegNext((hpos*255)/vp.H_DISPLAY)
         pred = 0
         pgreen = 0
-        pblue = cFix(x)
+        pblue = x
       elif(ptIdx == ptIdxRainbow):
         # generate rainbow #
         # inspired from http://blog.vermot.net/2011/11/03/generer-un-degrade-en-arc-en-ciel-en-fonction-d-une-valeur-programmatio/ #
@@ -150,31 +149,31 @@ def pattern(ptIdx):
         if(x < cTrig1):
           pred = cTrig1
         elif(x < cTrig2):
-          pred = cFix(cTrig2 - x)
+          pred = cTrig2 - x
         elif(x < cTrig4):
           pred = 0
         elif(x < cTrig5):
-          pred = cFix(x - cTrig4)
+          pred = x - cTrig4
         else:
           pred = cTrig1
 
         if(x < cTrig1):
-          pgreen = cFix(x)
+          pgreen = x
         elif(x < cTrig3):
           pgreen = cTrig1
         elif(x < cTrig4):
-          pgreen = cFix(cTrig4 - x)
+          pgreen = cTrig4 - x
         else:
           pgreen = 0
 
         if(x < cTrig2):
           pblue = 0
         elif(x < cTrig3):
-          pblue = cFix(x - cTrig2)
+          pblue = x - cTrig2
         elif(x < cTrig5):
           pblue = cTrig1
         elif(x < cTrig6):
-          pblue = cFix(cTrig6 - x)
+          pblue = cTrig6 - x
         else:
           pblue = 0
 
@@ -194,7 +193,7 @@ def pattern(ptIdx):
       elif(ptIdx == ptIdxIrishFlag):
         swidth = 1280
         pred = Mux(hpos < (swidth/3), 0, 255)
-        pgreen = Mux(hpos < (swidth*2/3), 255, cFix(128))
+        pgreen = Mux(hpos < (swidth*2/3), 255, 128)
         pblue = Mux((hpos >= (swidth/3)) and (hpos < (swidth*2/3)), 255, 0)
       elif(ptIdx == ptIdxItalianFlag):
         swidth = 1280
@@ -208,8 +207,8 @@ def pattern(ptIdx):
         pblue = 0
       elif(ptIdx == ptIdxDutchFlag):
         sheight = 720
-        prbright = Mux(vpos < (sheight/3), cFix(128), 255)
-        pbbright = Mux(vpos < (sheight*2/3), 255, cFix(128))
+        prbright = Mux(vpos < (sheight/3), 128, 255)
+        pbbright = Mux(vpos < (sheight*2/3), 255, 128)
         pred = Mux(vpos < (sheight*2/3), prbright, 0)
         pgreen = Mux((vpos >= (sheight/3)) and (vpos < (sheight*2/3)), 255, 0)
         pblue = Mux(vpos < (sheight/3), 0, pbbright)
@@ -281,13 +280,19 @@ def pattern(ptIdx):
         linv = Mux(((hpos > (swstep*6)) and (hpos <= (swstep*7))) or ((hpos > (swstep*9)) and (hpos <= (swstep*10))), minv, 0)
         kinv = Mux((hpos > (swstep*7)) and (hpos <= (swstep*9)), 0, 255)
         pgbright = Mux(((vpos > (shstep*6)) and (vpos <= (shstep*7))) or ((vpos > (shstep*9)) and (vpos <= (shstep*10))), kinv, linv)
-        prbright = Mux(pgbright > 0, 255, cFix(128))
-        pbbright = Mux(pgbright > 0, 255, cFix(128))
+        prbright = Mux(pgbright > 0, 255, 128)
+        pbbright = Mux(pgbright > 0, 255, 128)
         pinv = Mux((hpos > (swstep*6)) and (hpos <= (swstep*10)), pbbright, 0)
         ninv = Mux((hpos > (swstep*7)) and (hpos <= (swstep*9)), 0, prbright)
         pred = Mux((vpos > (shstep*7)) and (vpos <= (shstep*9)), 0, ninv)
         pgreen = Mux(((vpos > (shstep*6)) and (vpos <= (shstep*7))) or ((vpos > (shstep*9)) and (vpos <= (shstep*10))), kinv, linv)
         pblue = Mux((vpos > (shstep*6)) and (vpos <= (shstep*10)), pbbright, pinv)
+      elif(ptIdx == ptIdxUkraineFlag):
+       # blue #00 57 b7, yellow #ff d7 00  #
+        sheight = 720
+        pred  = Mux(vpos <= (sheight/2), 0x00, 0xFF)
+        pgreen= Mux(vpos <= (sheight/2), 0x00, 0xFF)
+        pblue = Mux(vpos <= (sheight/2), 0xFF, 0x00)
       else:
         pred   = 0
         pgreen = 0
@@ -301,5 +306,5 @@ def pattern(ptIdx):
 
 
 if __name__ == '__main__':
-  for p in range(19):
+  for p in range(20):
     pattern(p)

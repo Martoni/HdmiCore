@@ -16,32 +16,40 @@ class TMDSEncoder extends Module {
   val n_one_din = PopCount(io.din)
   /* create xor encodings */
   def xorfct(value: UInt): UInt = {
-    value.getWidth match {
-      case 1 => value(0)
-      case s => val res = xorfct(VecInit(value.asBools.drop(1)).asUInt)
-          value.asBools.head ^ res.asBools.head ## res
+    val vin = VecInit(value.asBools)
+    val res = VecInit(511.U.asBools)
+    res(0) := vin(0)
+    for(i <- 1 to 7){
+      res(i) := res(i-1) ^ vin(i)
     }
+    res(8) := 1.U
+    res.asUInt
   }
-  val xored = 1.U(1.W) ## xorfct(io.din)
+  val xored = xorfct(io.din)
 
   /* create xnor encodings */
   def xnorfct(value: UInt): UInt = {
-    value.getWidth match {
-      case 1 => value(0)
-      case s => val res = xnorfct(VecInit(value.asBools.drop(1)).asUInt)
-          !(value.asBools.head ^ res.asBools.head) ## res
+    val vin = VecInit(value.asBools)
+    val res = VecInit(511.U.asBools)
+    res(0) := vin(0)
+    for(i <- 1 to 7){
+      res(i) := !(res(i-1) ^ vin(i))
     }
+    res(8) := 0.U
+    res.asUInt
   }
-  val xnored = 0.U(1.W) ## xnorfct(io.din)
+  val xnored = xnorfct(io.din)
 
   /* use xnored or xored data based on the ones */
-  val q_m = Mux(
+  val q_m = RegInit(0.U(9.W))
+  q_m := Mux(
     (n_one_din > 4.U) || (n_one_din === 4.U && io.din(0) === 0.U),
     xnored, xored)
 
   /* ones counter for internal data */
-  val diff = PopCount(q_m).asSInt - 4.S
-  val diffSize = diff.getWidth
+  val diffSize = 4
+  val diff = RegInit(0.S(diffSize.W))
+  diff := PopCount(q_m).asSInt - 4.S
 
   val disparitySize = 4
   val disparityReg = RegInit(0.S(disparitySize.W))
@@ -58,7 +66,7 @@ class TMDSEncoder extends Module {
     when(disparityReg === 0.S || diff === 0.S){
       /* xnored data */
       when(q_m(8) === false.B){
-        doutReg := "b10".U(2.W) ## q_m(7, 0)
+        doutReg := "b10".U(2.W) ## ~q_m(7, 0)
         disparityReg := disparityReg - diff
       }.otherwise{
         doutReg := "b01".U(2.W) ## q_m(7, 0)

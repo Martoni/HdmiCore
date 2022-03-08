@@ -1,0 +1,24 @@
+//GOWIN Version: 1.9.8.03
+//Part Number: GW1NR-LV9QN88PC6/I5 
+//Device: GW1NR-9
+
+IO_LOC "O_tmds_clk_p" 69,68;
+IO_PORT "O_tmds_clk_p" PULL_MODE=NONE DRIVE=3.5;
+IO_LOC "O_tmds_data_0_p" 71,70;
+IO_PORT "O_tmds_data_0_p" PULL_MODE=NONE DRIVE=3.5;
+IO_LOC "O_tmds_data_1_p" 73,72;
+IO_PORT "O_tmds_data_1_p" PULL_MODE=NONE DRIVE=3.5;
+IO_LOC "O_tmds_data_2_p" 75,74;
+IO_PORT "O_tmds_data_2_p" PULL_MODE=NONE DRIVE=3.5;
+
+IO_LOC "O_led[0]" 10;
+IO_PORT "O_led[0]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8;
+
+IO_LOC "I_reset_n" 4;
+IO_PORT "I_reset_n" PULL_MODE=UP;
+IO_LOC "I_clk" 52;
+IO_PORT "I_clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+
+IO_LOC "I_button" 3;
+IO_PORT "I_button" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+

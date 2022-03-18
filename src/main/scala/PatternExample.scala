@@ -4,7 +4,6 @@ import chisel3._
 import chisel3.util._
 
 import video.{VideoParams, HVSync}
-import fpgamacro.gowin.{Oser10Module, TLVDS_OBUF}
 
 
 sealed trait PatternType
@@ -32,8 +31,7 @@ case object ptHGradient extends PatternType
 
 class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
   val io = IO(new Bundle {
-    val serClk = Input(Clock())
-    val tmds = Output(new Tmds())
+    val videoSig = Output(new VideoHdmi())
     val I_button = Input(Bool())
   })
 
@@ -336,36 +334,10 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pblue  := 0.U
   }
 
-  /* hdmi transmission */
-  val rgb2tmds = Module(new Rgb2Tmds())
-  rgb2tmds.io.videoSig.de := video_de 
-  rgb2tmds.io.videoSig.hsync := hv_sync.io.hsync
-  rgb2tmds.io.videoSig.vsync := hv_sync.io.vsync
-  rgb2tmds.io.videoSig.pixel.red   := pred
-  rgb2tmds.io.videoSig.pixel.green := pgreen
-  rgb2tmds.io.videoSig.pixel.blue  := pblue
-
-  /* serdes */
-  // Blue -> data 0
-  val serdesBlue = Module(new Oser10Module())
-  serdesBlue.io.data := rgb2tmds.io.tmds_blue
-  serdesBlue.io.fclk := io.serClk
-
-  // Green -> data 1
-  val serdesGreen = Module(new Oser10Module())
-  serdesGreen.io.data := rgb2tmds.io.tmds_green
-  serdesGreen.io.fclk := io.serClk
-
-  // Red -> data 2
-  val serdesRed = Module(new Oser10Module())
-  serdesRed.io.data := rgb2tmds.io.tmds_red
-  serdesRed.io.fclk := io.serClk
-
-  io.tmds.data := serdesRed.io.q ## serdesGreen.io.q ## serdesBlue.io.q
-
-  // clock
-  val serdesClk = Module(new Oser10Module())
-  serdesClk.io.data := "b1111100000".U(10.W)
-  serdesClk.io.fclk := io.serClk
-  io.tmds.clk := serdesClk.io.q
+  io.videoSig.de := video_de
+  io.videoSig.hsync := hv_sync.io.hsync
+  io.videoSig.vsync := hv_sync.io.vsync
+  io.videoSig.pixel.red   := pred
+  io.videoSig.pixel.green := pgreen
+  io.videoSig.pixel.blue  := pblue
 }

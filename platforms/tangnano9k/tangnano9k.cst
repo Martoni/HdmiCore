@@ -3,13 +3,13 @@
 //Device: GW1NR-9
 
 IO_LOC "O_tmds_clk_p" 69,68;
-IO_PORT "O_tmds_clk_p" PULL_MODE=NONE DRIVE=3.5;
+IO_PORT "O_tmds_clk_p" PULL_MODE=NONE DRIVE=8;
 IO_LOC "O_tmds_data_0_p" 71,70;
-IO_PORT "O_tmds_data_0_p" PULL_MODE=NONE DRIVE=3.5;
+IO_PORT "O_tmds_data_0_p" PULL_MODE=NONE DRIVE=8;
 IO_LOC "O_tmds_data_1_p" 73,72;
-IO_PORT "O_tmds_data_1_p" PULL_MODE=NONE DRIVE=3.5;
+IO_PORT "O_tmds_data_1_p" PULL_MODE=NONE DRIVE=8;
 IO_LOC "O_tmds_data_2_p" 75,74;
-IO_PORT "O_tmds_data_2_p" PULL_MODE=NONE DRIVE=3.5;
+IO_PORT "O_tmds_data_2_p" PULL_MODE=NONE DRIVE=8;
 
 IO_LOC "O_led[0]" 10;
 IO_PORT "O_led[0]" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8;

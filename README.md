@@ -70,7 +70,6 @@ Then finaly add these files (prefere to not copy in local directory):
 TangNano4k.v
 platforms/tangnano4k/tangnano4k.cst
 platforms/tangnano4k/tangnano4k.sdc
-platforms/tangnano4k/TMDS_PLLVR.v
 ```
 
 Then launch synthesis and place&route

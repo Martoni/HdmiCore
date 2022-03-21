@@ -3,7 +3,7 @@ package hdmicore
 import chisel3._
 import chisel3.util._
 
-import video.{VideoParams, HVSync}
+import video.{VideoParams, HVSync, VideoConsts}
 
 
 sealed trait PatternType
@@ -29,7 +29,8 @@ case object ptVGradient extends PatternType
 case object ptHGradient extends PatternType
 
 
-class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
+class PatternExample(vp: VideoParams = VideoConsts.m1280x720.params,
+                     pt: PatternType = ptUkraineFlag) extends Module {
   val io = IO(new Bundle {
     val videoSig = Output(new VideoHdmi())
     val I_button = Input(Bool())
@@ -82,13 +83,6 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
      case `ptHGradient` => ptIdxHGradient
      case whoa => ptIdxBlackVoid
   }
-
-  val vp = VideoParams(
-      H_DISPLAY = 1280, H_FRONT = 110,
-      H_SYNC = 40, H_BACK = 220,
-      V_SYNC = 5,  V_BACK = 20,
-      V_TOP = 5, V_DISPLAY = 720,
-      V_BOTTOM = 20)
 
   val hv_sync = Module(new HVSync(vp)) // Synchronize VGA module
   val video_de = hv_sync.io.display_on

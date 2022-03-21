@@ -9,8 +9,9 @@ import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 import fpgamacro.gowin.{CLKDIV, TMDS_PLLVR, TLVDS_OBUF}
 import hdmicore.{PatternExample, TMDSDiff, DiffPair, HdmiTx}
+import hdmicore.video.{VideoMode, VideoConsts}
 
-class TangNano4k extends RawModule {
+class TangNano4k(vmode: VideoMode = VideoConsts.m1280x720) extends RawModule {
 
     /************/
     /** outputs */
@@ -45,7 +46,7 @@ class TangNano4k extends RawModule {
     clkDiv.io.CALIB := true.B
 
     /* TMDS PLL */
-    val tmdsPllvr = Module(new TMDS_PLLVR())
+    val tmdsPllvr = Module(new TMDS_PLLVR(vmode.pll))
     tmdsPllvr.io.clkin := I_clk
     serial_clk := tmdsPllvr.io.clkout
     pll_lock := tmdsPllvr.io.lock
@@ -57,7 +58,7 @@ class TangNano4k extends RawModule {
       val (counterReg, counterPulse) = Counter(true.B, max_count)
       O_led := (counterReg >= (max_count/2).U)
 
-      val patternExample = Module(new PatternExample())
+      val patternExample = Module(new PatternExample(vmode.params))
       patternExample.io.I_button := I_button
 
       val hdmiTx = Module(new HdmiTx())

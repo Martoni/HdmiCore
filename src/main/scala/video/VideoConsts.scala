@@ -15,6 +15,8 @@ package object VideoConsts {
   val p51400khz  = PLLParams(IDIV_SEL = 1, FBDIV_SEL = 18, ODIV_SEL = 4, DYN_SDIV_SEL = 20)
   val p65000khz  = PLLParams(IDIV_SEL = 0, FBDIV_SEL = 11, ODIV_SEL = 2, DYN_SDIV_SEL = 26)
   val p74250khz  = PLLParams(IDIV_SEL = 3, FBDIV_SEL = 54, ODIV_SEL = 2, DYN_SDIV_SEL = 30)
+  val p85500khz  = PLLParams(IDIV_SEL = 3, FBDIV_SEL = 62, ODIV_SEL = 2, DYN_SDIV_SEL = 34)
+  val p106500khz = PLLParams(IDIV_SEL = 2, FBDIV_SEL = 58, ODIV_SEL = 2, DYN_SDIV_SEL = 42)
   val p108000khz = PLLParams(IDIV_SEL = 0, FBDIV_SEL = 19, ODIV_SEL = 2, DYN_SDIV_SEL = 44)
 
   // to be checked
@@ -101,6 +103,42 @@ package object VideoConsts {
       V_BOTTOM = 20
     ),
     pll = p74250khz
+  )
+
+  // D: 85.50 MHz, H: 47.700 kHz, V: 60.00 Hz
+  val m1360x768 = VideoMode(
+    params = VideoParams(
+      H_DISPLAY = 1360, H_FRONT = 64,
+      H_SYNC = 112, H_BACK = 256,
+      V_SYNC = 6,  V_BACK = 18,
+      V_TOP = 3, V_DISPLAY = 768,
+      V_BOTTOM = 18
+    ),
+    pll = p85500khz
+  )
+
+  // D: 85.50 MHz, H: 47.880 kHz, V: 60.00 Hz
+  val m1366x768 = VideoMode(
+    params = VideoParams(
+      H_DISPLAY = 1366, H_FRONT = 70,
+      H_SYNC = 143, H_BACK = 213,
+      V_SYNC = 3,  V_BACK = 24,
+      V_TOP = 3, V_DISPLAY = 768,
+      V_BOTTOM = 24
+    ),
+    pll = p85500khz
+  )
+
+  // D: 106.50 MHz, H: 56.040 kHz, V: 60.00 Hz
+  val m1440x900 = VideoMode(
+    params = VideoParams(
+      H_DISPLAY = 1440, H_FRONT = 80,
+      H_SYNC = 152, H_BACK = 232,
+      V_SYNC = 6,  V_BACK = 25,
+      V_TOP = 3, V_DISPLAY = 900,
+      V_BOTTOM = 25
+    ),
+    pll = p106500khz
   )
 
   // D: 108.00 MHz, H: 63.981 kHz, V: 60.02 Hz

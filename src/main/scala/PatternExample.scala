@@ -3,8 +3,7 @@ package hdmicore
 import chisel3._
 import chisel3.util._
 
-import video.{VideoParams, HVSync}
-import fpgamacro.gowin.{Oser10Module, TLVDS_OBUF}
+import video.{VideoParams, HVSync, VideoConsts}
 
 
 sealed trait PatternType
@@ -30,10 +29,10 @@ case object ptVGradient extends PatternType
 case object ptHGradient extends PatternType
 
 
-class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
+class PatternExample(vp: VideoParams = VideoConsts.m1280x720.params,
+                     pt: PatternType = ptUkraineFlag) extends Module {
   val io = IO(new Bundle {
-    val serClk = Input(Clock())
-    val tmds = Output(new Tmds())
+    val videoSig = Output(new VideoHdmi())
     val I_button = Input(Bool())
   })
 
@@ -84,13 +83,6 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
      case `ptHGradient` => ptIdxHGradient
      case whoa => ptIdxBlackVoid
   }
-
-  val vp = VideoParams(
-      H_DISPLAY = 1280, H_FRONT = 110,
-      H_SYNC = 40, H_BACK = 220,
-      V_SYNC = 5,  V_BACK = 20,
-      V_TOP = 5, V_DISPLAY = 720,
-      V_BOTTOM = 20)
 
   val hv_sync = Module(new HVSync(vp)) // Synchronize VGA module
   val video_de = hv_sync.io.display_on
@@ -223,55 +215,55 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pgreen := Mux(0.U === vpos % 2.U, 0.U, 255.U)
     pblue  := Mux(0.U === vpos % 2.U, 0.U, 255.U)
   } .elsewhen(ptIdx === ptIdxFrenchFlag){
-    val swidth = 1280
+    val swidth = vp.H_DISPLAY
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxIrishFlag){
-    val swidth = 1280
+    val swidth = vp.H_DISPLAY
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 128.U)
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxItalianFlag){
-    val swidth = 1280
+    val swidth = vp.H_DISPLAY
     pred := Mux(hpos < (swidth/3).U, 0.U, 255.U)
     pgreen := Mux(hpos < (swidth*2/3).U, 255.U, 0.U)
     pblue := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxBelgianFlag){
-    val swidth = 1280
+    val swidth = vp.H_DISPLAY
     pred := Mux(hpos >= (swidth/3).U, 255.U, 0.U)
     pgreen := Mux((hpos >= (swidth/3).U) && (hpos < (swidth*2/3).U), 255.U, 0.U)
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxDutchFlag){
-    val sheight = 720
+    val sheight = vp.V_DISPLAY
     val prbright = Mux(vpos < (sheight/3).U, 128.U, 255.U)
     val pbbright = Mux(vpos < (sheight*2/3).U, 255.U, 128.U)
     pred := Mux(vpos < (sheight*2/3).U, prbright, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, pbbright)
   } .elsewhen(ptIdx === ptIdxLuxembourgishFlag){
-    val sheight = 720
+    val sheight = vp.V_DISPLAY
     pred := Mux(vpos < (sheight*2/3).U, 255.U, 0.U)
     pgreen := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux(vpos < (sheight/3).U, 0.U, 255.U)
   } .elsewhen(ptIdx === ptIdxGermanFlag){
-    val sheight = 720
+    val sheight = vp.V_DISPLAY
     pred := Mux(vpos >= (sheight/3).U, 255.U, 0.U)
     pgreen := Mux(vpos < (sheight*2/3).U, 0.U, 255.U)
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxSpanishFlag){
-    val sheight = 720
+    val sheight = vp.V_DISPLAY
     pred := 255.U
     pgreen := Mux((vpos >= (sheight/4).U) && (vpos < (sheight*3/4).U), 255.U, 0.U)
     pblue := 0.U
   } .elsewhen(ptIdx === ptIdxAustrianFlag){
-    val sheight = 720
+    val sheight = vp.V_DISPLAY
     pred := 255.U
     pgreen :=  Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
     pblue := Mux((vpos >= (sheight/3).U) && (vpos < (sheight*2/3).U), 255.U, 0.U)
   } .elsewhen(ptIdx === ptIdxGreekFlag){
-    val swidth = 1280
-    val sheight = 720
+    val swidth = vp.H_DISPLAY
+    val sheight = vp.V_DISPLAY
     val swstep = swidth*3/80
     val shstep = sheight/9
     val oinv = Mux((hpos <= (swstep*10).U) && (vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, 0.U)
@@ -281,8 +273,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pgreen := Mux(vpos % (sheight*2/9).U > (sheight/9).U, ninv, pinv)
     pblue := 255.U
   } .elsewhen(ptIdx === ptIdxDanishFlag){
-    val swidth = 1280
-    val sheight = 720
+    val swidth = vp.H_DISPLAY
+    val sheight = vp.V_DISPLAY
     val swstep = swidth*4/37
     val shstep = sheight/7
     val pinv = Mux((hpos > (swstep*3).U) && (hpos <= (swstep*4).U), 255.U, 0.U)
@@ -290,8 +282,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pgreen := Mux((vpos > (shstep*3).U) && (vpos <= (shstep*4).U), 255.U, pinv)
     pblue := Mux((vpos > (shstep*3).U) && (vpos <= (shstep*4).U), 255.U, pinv)
   } .elsewhen(ptIdx === ptIdxSwedishFlag){
-    val swidth = 1280
-    val sheight = 720
+    val swidth = vp.H_DISPLAY
+    val sheight = vp.V_DISPLAY
     val swstep = swidth/16
     val shstep = sheight/5
     val pinv = Mux((hpos > (swstep*5).U) && (hpos <= (swstep*7).U), 255.U, 0.U)
@@ -300,8 +292,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pgreen := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 255.U, pinv)
     pblue := Mux((vpos > (shstep*2).U) && (vpos <= (shstep*3).U), 0.U, ninv)
   } .elsewhen(ptIdx === ptIdxFinnishFlag){
-    val swidth = 1280
-    val sheight = 720
+    val swidth = vp.H_DISPLAY
+    val sheight = vp.V_DISPLAY
     val swstep = swidth/18
     val shstep = sheight/11
     val ninv = Mux((hpos > (swstep*5).U) && (hpos <= (swstep*8).U), 0.U, 255.U)
@@ -309,8 +301,8 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pgreen := Mux((vpos > (shstep*4).U) && (vpos <= (shstep*7).U), 0.U, ninv)
     pblue := 255.U
   } .elsewhen(ptIdx === ptIdxNorwegianFlag){
-    val swidth = 1280
-    val sheight = 720
+    val swidth = vp.H_DISPLAY
+    val sheight = vp.V_DISPLAY
     val swstep = swidth/22
     val shstep = sheight/16
     val minv = Mux((vpos > (shstep*7).U) && (vpos <= (shstep*9).U), 0.U, 255.U)
@@ -326,7 +318,7 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pblue := Mux((vpos > (shstep*6).U) && (vpos <= (shstep*10).U), pbbright, pinv)
   } .elsewhen(ptIdx === ptIdxUkraineFlag){
    /* blue #00 57 b7, yellow #ff d7 00  */
-    val sheight = 720
+    val sheight = vp.V_DISPLAY
     pred  := Mux(vpos <= (sheight/2).U, "h00".U, "hFF".U)
     pgreen:= Mux(vpos <= (sheight/2).U, "h00".U, "hFF".U)
     pblue := Mux(vpos <= (sheight/2).U, "hFF".U, "h00".U)
@@ -336,36 +328,10 @@ class PatternExample(pt: PatternType = ptUkraineFlag) extends Module {
     pblue  := 0.U
   }
 
-  /* hdmi transmission */
-  val rgb2tmds = Module(new Rgb2Tmds())
-  rgb2tmds.io.videoSig.de := video_de 
-  rgb2tmds.io.videoSig.hsync := hv_sync.io.hsync
-  rgb2tmds.io.videoSig.vsync := hv_sync.io.vsync
-  rgb2tmds.io.videoSig.pixel.red   := pred
-  rgb2tmds.io.videoSig.pixel.green := pgreen
-  rgb2tmds.io.videoSig.pixel.blue  := pblue
-
-  /* serdes */
-  // Blue -> data 0
-  val serdesBlue = Module(new Oser10Module())
-  serdesBlue.io.data := rgb2tmds.io.tmds_blue
-  serdesBlue.io.fclk := io.serClk
-
-  // Green -> data 1
-  val serdesGreen = Module(new Oser10Module())
-  serdesGreen.io.data := rgb2tmds.io.tmds_green
-  serdesGreen.io.fclk := io.serClk
-
-  // Red -> data 2
-  val serdesRed = Module(new Oser10Module())
-  serdesRed.io.data := rgb2tmds.io.tmds_red
-  serdesRed.io.fclk := io.serClk
-
-  io.tmds.data := serdesRed.io.q ## serdesGreen.io.q ## serdesBlue.io.q
-
-  // clock
-  val serdesClk = Module(new Oser10Module())
-  serdesClk.io.data := "b1111100000".U(10.W)
-  serdesClk.io.fclk := io.serClk
-  io.tmds.clk := serdesClk.io.q
+  io.videoSig.de := video_de
+  io.videoSig.hsync := hv_sync.io.hsync
+  io.videoSig.vsync := hv_sync.io.vsync
+  io.videoSig.pixel.red   := pred
+  io.videoSig.pixel.green := pgreen
+  io.videoSig.pixel.blue  := pblue
 }

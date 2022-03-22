@@ -8,9 +8,10 @@ import chisel3.util._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 import fpgamacro.gowin.{CLKDIV, TMDS_PLLVR, TLVDS_OBUF}
-import hdmicore.{PatternExample, TMDSDiff, DiffPair}
+import hdmicore.{PatternExample, TMDSDiff, DiffPair, HdmiTx}
+import hdmicore.video.{VideoMode, VideoConsts}
 
-class TangNano4k extends RawModule {
+class TangNano4k(vmode: VideoMode = VideoConsts.m1280x720) extends RawModule {
 
     /************/
     /** outputs */
@@ -45,7 +46,7 @@ class TangNano4k extends RawModule {
     clkDiv.io.CALIB := true.B
 
     /* TMDS PLL */
-    val tmdsPllvr = Module(new TMDS_PLLVR())
+    val tmdsPllvr = Module(new TMDS_PLLVR(vmode.pll))
     tmdsPllvr.io.clkin := I_clk
     serial_clk := tmdsPllvr.io.clkout
     pll_lock := tmdsPllvr.io.lock
@@ -57,19 +58,22 @@ class TangNano4k extends RawModule {
       val (counterReg, counterPulse) = Counter(true.B, max_count)
       O_led := (counterReg >= (max_count/2).U)
 
-      val patternExample = Module(new PatternExample())
-      patternExample.io.serClk := serial_clk
+      val patternExample = Module(new PatternExample(vmode.params))
       patternExample.io.I_button := I_button
+
+      val hdmiTx = Module(new HdmiTx())
+      hdmiTx.io.serClk := serial_clk
+      patternExample.io.videoSig <> hdmiTx.io.videoSig
 
       /* LVDS output */
       val buffDiffBlue = Module(new TLVDS_OBUF())
-      buffDiffBlue.io.I := patternExample.io.tmds.data(0)
+      buffDiffBlue.io.I := hdmiTx.io.tmds.data(0)
       val buffDiffGreen = Module(new TLVDS_OBUF())
-      buffDiffGreen.io.I := patternExample.io.tmds.data(1)
+      buffDiffGreen.io.I := hdmiTx.io.tmds.data(1)
       val buffDiffRed = Module(new TLVDS_OBUF())
-      buffDiffRed.io.I := patternExample.io.tmds.data(2)
+      buffDiffRed.io.I := hdmiTx.io.tmds.data(2)
       val buffDiffClk = Module(new TLVDS_OBUF())
-      buffDiffClk.io.I := patternExample.io.tmds.clk
+      buffDiffClk.io.I := hdmiTx.io.tmds.clk
 
       O_tmds.data(0).p := buffDiffBlue.io.O
       O_tmds.data(0).n := buffDiffBlue.io.OB

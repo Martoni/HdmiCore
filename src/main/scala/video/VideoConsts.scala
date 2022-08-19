@@ -177,4 +177,16 @@ package object VideoConsts {
     ),
     pll = p108000khz
   )
+
+  // D: 108.00 MHz, H: 53.465 kHz, V: 55.0055 Hz
+  val m1824x940 = VideoMode(
+    params = VideoParams(
+      H_DISPLAY = 1824, H_FRONT = 20,
+      H_SYNC = 80, H_BACK = 96,
+      V_SYNC = 10,  V_BACK = 20,
+      V_TOP = 2, V_DISPLAY = 940,
+      V_BOTTOM = 0
+    ),
+    pll = p108000khz
+  )
 }

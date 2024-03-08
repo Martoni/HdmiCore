@@ -4,8 +4,8 @@ package hdmicore.platforms
  */
 
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 import fpgamacro.gowin.{CLKDIV, TMDS_PLLVR, TLVDS_OBUF}
 import hdmicore.{PatternExample, TMDSDiff, DiffPair, HdmiTx}
@@ -86,6 +86,15 @@ class Ulx3s extends RawModule {
 }
 
 object Ulx3s extends App {
-  (new ChiselStage).execute(args,
-    Seq(ChiselGeneratorAnnotation(() => new Ulx3s())))
+  val verilog_src = ChiselStage
+    .emitSystemVerilog(
+        new Ulx3s,
+        firtoolOpts = Array(
+          "-disable-all-randomization",
+           "--lowering-options=disallowLocalVariables", // avoid 'automatic logic'
+           "-strip-debug-info"))
+  val fverilog = os.pwd / "Ulx3s.v"
+  if(os.exists(fverilog))
+    os.remove(fverilog)
+  os.write(fverilog, verilog_src)
 }

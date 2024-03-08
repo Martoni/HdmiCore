@@ -4,8 +4,8 @@ package hdmicore.platforms
  */
 
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 import fpgamacro.gowin.{CLKDIV, TMDS_PLLVR, TLVDS_OBUF}
 import hdmicore.{PatternExample, TMDSDiff, DiffPair, HdmiTx}
@@ -87,6 +87,15 @@ class TangNano4k(vmode: VideoMode = VideoConsts.m1280x720) extends RawModule {
 }
 
 object TangNano4k extends App {
-  (new ChiselStage).execute(args,
-    Seq(ChiselGeneratorAnnotation(() => new TangNano4k())))
+  val verilog_src = ChiselStage
+    .emitSystemVerilog(
+        new TangNano4k,
+        firtoolOpts = Array(
+          "-disable-all-randomization",
+           "--lowering-options=disallowLocalVariables", // avoid 'automatic logic'
+           "-strip-debug-info"))
+  val fverilog = os.pwd / "TangNano4k.v"
+  if(os.exists(fverilog))
+    os.remove(fverilog)
+  os.write(fverilog, verilog_src)
 }

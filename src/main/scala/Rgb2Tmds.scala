@@ -1,8 +1,8 @@
 package hdmicore
 
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 class Rgb2Tmds extends Module {
   val io = IO(new Bundle {
@@ -35,6 +35,14 @@ class Rgb2Tmds extends Module {
 }
 
 object Rgb2Tmds extends App {
-  (new ChiselStage).execute(args,
-    Seq(ChiselGeneratorAnnotation(() => new Rgb2Tmds())))
+  val verilog_src = ChiselStage
+    .emitSystemVerilog(new Rgb2Tmds,
+        firtoolOpts = Array(
+          "-disable-all-randomization",
+           "--lowering-options=disallowLocalVariables", // avoid 'automatic logic'
+           "-strip-debug-info"))
+  val fverilog = os.pwd / "Rgb2Tmds.v"
+  if(os.exists(fverilog))
+    os.remove(fverilog)
+  os.write(fverilog, verilog_src)
 }

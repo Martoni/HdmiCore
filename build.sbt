@@ -1,30 +1,27 @@
 // See README.md for license details.
 
-
-scalaVersion     := "2.13.8"
-version          := "0.1.1"
-organization     := "eu.fabienm"
-
-val majorChiselVersion = "3"
-val minorChiselVersion = "5.6"
+val majorChiselVersion = "6"
+val minorChiselVersion = "2.0"
 
 val chiselVersion = majorChiselVersion + "." + minorChiselVersion
+
+scalaVersion     := "2.13.8"
+version          := chiselVersion
+organization     := "eu.fabienm"
 
 lazy val root = (project in file("."))
   .settings(
     name := "hdmicore",
     libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "chisel3" % chiselVersion,
-      "edu.berkeley.cs" %% "chiseltest" % ("0." + minorChiselVersion) % "test",
-      "Martoni" %% "fpgamacro" % "0.2.2"
+      "org.chipsalliance" %% "chisel" % chiselVersion,
+      "Martoni" %% "fpgamacro" % "6.2.1"
     ),
     scalacOptions ++= Seq(
-      "-Xsource:2.11",
       "-language:reflectiveCalls",
       "-deprecation",
       "-feature",
       "-Xcheckinit",
+      "-Ymacro-annotations",
     ),
-    addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full),
+    addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chiselVersion cross CrossVersion.full),
   )
-

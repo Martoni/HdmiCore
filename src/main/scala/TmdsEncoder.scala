@@ -1,8 +1,8 @@
 package hdmicore
 
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 class TMDSEncoder extends Module {
   val io = IO(new Bundle {
@@ -93,6 +93,15 @@ class TMDSEncoder extends Module {
 }
 
 object TMDSEncoder extends App {
-  (new ChiselStage).execute(args,
-    Seq(ChiselGeneratorAnnotation(() => new TMDSEncoder())))
+  val verilog_src = ChiselStage
+    .emitSystemVerilog(
+        new TMDSEncoder,
+        firtoolOpts = Array(
+          "-disable-all-randomization",
+           "--lowering-options=disallowLocalVariables", // avoid 'automatic logic'
+           "-strip-debug-info"))
+  val fverilog = os.pwd / "TMDSEncoder.v"
+  if(os.exists(fverilog))
+    os.remove(fverilog)
+  os.write(fverilog, verilog_src)
 }

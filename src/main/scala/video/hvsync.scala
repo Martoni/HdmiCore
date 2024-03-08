@@ -5,8 +5,8 @@ package hdmicore.video
 * */
 
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 
 case class VideoParams(
   val H_DISPLAY: Int,// horizontal display width
@@ -87,6 +87,15 @@ class HVSync(val vp: VideoParams = VideoParams(
 }
 
 object HVSyncDriver extends App {
-  (new ChiselStage).execute(args,
-    Seq(ChiselGeneratorAnnotation(() => new HVSync())))
+  val verilog_src = ChiselStage
+    .emitSystemVerilog(
+        new HVSync,
+        firtoolOpts = Array(
+          "-disable-all-randomization",
+           "--lowering-options=disallowLocalVariables", // avoid 'automatic logic'
+           "-strip-debug-info"))
+  val fverilog = os.pwd / "HVSync.v"
+  if(os.exists(fverilog))
+    os.remove(fverilog)
+  os.write(fverilog, verilog_src)
 }
